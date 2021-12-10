@@ -3,6 +3,9 @@ import {
   WalletDisconnectButton,
   WalletMultiButton,
 } from '@solana/wallet-adapter-react-ui';
+import { SendOneLamportToRandomAddress } from '../components/SendLamportExample';
+
+const sendLamportExample = () => {};
 
 const Home: NextPage = () => {
   return (
@@ -10,6 +13,7 @@ const Home: NextPage = () => {
       <div>
         <WalletMultiButton />
         <WalletDisconnectButton />
+        <SendOneLamportToRandomAddress />
       </div>
     </div>
   );
