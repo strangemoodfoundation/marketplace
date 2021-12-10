@@ -14,12 +14,18 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { FC, ReactNode, useMemo } from 'react';
+import { useFlag } from '../lib/useFlag';
+
+let networks = {
+  'mainnet-beta': WalletAdapterNetwork.Mainnet,
+  testnet: WalletAdapterNetwork.Testnet,
+};
 
 export const WalletConnectionProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // Can be set to 'devnet', 'testnet', or 'mainnet-beta'
-  const network = WalletAdapterNetwork.Devnet;
+  const flag = useFlag('network', 'mainnet-beta');
+  const network = networks[flag];
 
   // You can also provide a custom RPC endpoint
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
