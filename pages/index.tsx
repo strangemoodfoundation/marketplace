@@ -11,18 +11,20 @@ import type { NextPage } from 'next';
 import * as solana from '@solana/web3.js';
 import { useRouter } from 'next/router';
 import { useFlag } from '../lib/useFlag';
+import { CreateWrappedNativeAccountExample } from '../components/CreateWrappedNativeAccountExample';
+import { GetAccountListingsExample } from '../components/GetAccountListingExample';
 
 const Home: NextPage = () => {
-  const network = useFlag('network', 'mainnet-beta');
+  // const network = useFlag('network', 'mainnet-beta');
 
-  function onMakeNewListing() {
-    const conn = new solana.Connection(solana.clusterApiUrl(network));
-    // Strangemood.client.createListing(
-    //   conn,
-    //   Strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
-    //   {}
-    // );
-  }
+  // function onMakeNewListing() {
+  //   const conn = new solana.Connection(solana.clusterApiUrl(network));
+  //   // Strangemood.client.createListing(
+  //   //   conn,
+  //   //   Strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+  //   //   {}
+  //   // );
+  // }
 
   return (
     <div className="text-xl">
@@ -30,14 +32,17 @@ const Home: NextPage = () => {
         <WalletMultiButton />
         <WalletDisconnectButton />
         <SendOneLamportToRandomAddress />
-        <button
+        <CreateWrappedNativeAccountExample />
+        <GetAccountListingsExample />
+
+        {/* <button
           className="px-4 border"
           onClick={() => {
             onMakeNewListing();
           }}
         >
           Make new Listing
-        </button>
+        </button> */}
       </div>
     </div>
   );
