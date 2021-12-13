@@ -26,7 +26,8 @@ export const CreateListingExample: FC = () => {
 
   // TODO: replace/abstract
   const getOrCreateAssociatedAccount = async (
-    destPublicKey: PublicKey
+    destPublicKey: PublicKey,
+    mint: PublicKey
   ): Promise<PublicKey> => {
     if (!publicKey) throw new WalletNotConnectedError();
 
@@ -34,7 +35,7 @@ export const CreateListingExample: FC = () => {
       await Token.getAssociatedTokenAddress(
         strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
         publicKey,
-        strangemood.MAINNET.STRANGEMOOD_FOUNDATION_MINT,
+        mint,
         destPublicKey
       );
 
@@ -75,7 +76,7 @@ export const CreateListingExample: FC = () => {
       transaction.add(
         Token.createTransferInstruction(
           TOKEN_PROGRAM_ID,
-          strangemood.MAINNET.STRANGEMOOD_FOUNDATION_MINT,
+          mint,
           associatedDestinationTokenAddr,
           publicKey,
           [],
@@ -95,15 +96,15 @@ export const CreateListingExample: FC = () => {
     // TODO
     const ARBITRARY_PRICE_FOR_NOW = 1000;
 
-    const wrappedSolAccount = await createWrappedNativeAccount(
-      connection,
-      publicKey,
-      ARBITRARY_PRICE_FOR_NOW
-    );
-
     // a token-specific account that only the purchaser can withdraw from
     const associatedDestinationTokenAddr = await getOrCreateAssociatedAccount(
-      publicKey
+      publicKey,
+      strangemood.MAINNET.STRANGEMOOD_FOUNDATION_MINT
+    );
+
+    const associatedAccountWrappedSolAddr = await getOrCreateAssociatedAccount(
+      publicKey,
+      NATIVE_MINT
     );
 
     const transaction = await strangemood.client.createListingInstruction(
@@ -111,10 +112,10 @@ export const CreateListingExample: FC = () => {
       strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
       {
         payer: publicKey,
-        signer: publicKey, /////////////// NOPE.... who is signing ?????
+        signer: publicKey,
       },
       {
-        solDeposit: wrappedSolAccount,
+        solDeposit: associatedAccountWrappedSolAddr,
         voteDeposit: associatedDestinationTokenAddr,
         priceInLamports: ARBITRARY_PRICE_FOR_NOW,
         charterGovernance:

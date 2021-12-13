@@ -1,20 +1,13 @@
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 
-import {
-  Keypair,
-  SystemProgram,
-  Transaction,
-  PublicKey,
-} from '@solana/web3.js';
+import { Keypair, Transaction, PublicKey } from '@solana/web3.js';
 import {
   Token,
-  NATIVE_MINT,
-  AccountLayout,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import strangemood from '@strangemood/strangemood';
 import { getListingAccount } from '@strangemood/strangemood/dist/strangemood';
 import {
@@ -24,9 +17,6 @@ import {
 import { ListingAccount } from '../../strangemood/js/dist/strangemood/types';
 
 export const PurchaseListingExample: FC = () => {
-  const [wrappedNativeAccount, setWrappedNativeAccount] = useState<
-    undefined | Keypair
-  >(undefined);
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
 
@@ -34,8 +24,6 @@ export const PurchaseListingExample: FC = () => {
   const getOrCreateAssociatedAccount = async (
     destPublicKey: PublicKey,
     listingAccount: ListingAccount
-    // mintToken: Token
-    // receiverAccount: string
   ): Promise<PublicKey> => {
     if (!publicKey) throw new WalletNotConnectedError();
 
@@ -72,7 +60,6 @@ export const PurchaseListingExample: FC = () => {
       if (associatedDestinationAccount === null) {
         transaction.add(
           Token.createAssociatedTokenAccountInstruction(
-            // strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
             ASSOCIATED_TOKEN_PROGRAM_ID,
             TOKEN_PROGRAM_ID,
             listingAccount.data.communityTokenAccount,
@@ -95,7 +82,6 @@ export const PurchaseListingExample: FC = () => {
     }
 
     await sendAndConfirmWalletTransaction(connection, transaction, []);
-
     return associatedDestinationTokenAddr;
   };
 
