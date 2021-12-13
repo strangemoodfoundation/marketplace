@@ -24,12 +24,20 @@ export const sendAndConfirmWalletTransaction = async (
   transaction: Transaction,
   options?: SendTransactionOptions
 ): Promise<TransactionSignature> => {
+  console.log(transaction);
+
   const signature = await sendTransaction(transaction, connection, {
     preflightCommitment: 'recent',
     skipPreflight: false,
     ...options,
   });
-  await connection.confirmTransaction(signature, 'processed');
+  try {
+    await connection.confirmTransaction(signature, 'processed');
+  } catch (err) {
+    console.error(err);
+    console.log('&&& verification of transaction failed');
+  }
+
   return signature;
 };
 
@@ -44,6 +52,8 @@ export const createWrappedNativeAccount = async (
   amount: number
 ) => {
   if (!publicKey) throw new WalletNotConnectedError();
+
+  console.log('createWrappedNativeAccount');
 
   // Allocate memory for the account
   const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(
@@ -85,8 +95,8 @@ export const createWrappedNativeAccount = async (
   await sendAndConfirmWalletTransaction(
     connection,
     sendTransaction,
-    transaction
-    // [newAccount]
+    transaction,
+    { signers: [newAccount] }
   );
 
   return newAccount.publicKey;

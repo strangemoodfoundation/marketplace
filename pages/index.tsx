@@ -17,7 +17,7 @@ import { CreateListingExample } from '../components/CreateListingExample';
 import { PurchaseListingExample } from '../components/PurchaseListingExample';
 
 const Home: NextPage = () => {
-  // const network = useFlag('network', 'mainnet-beta');
+  const network = useFlag('network', 'mainnet-beta');
 
   // function onMakeNewListing() {
   //   const conn = new solana.Connection(solana.clusterApiUrl(network));

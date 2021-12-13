@@ -28,12 +28,12 @@ export const CreateListingExample: FC = () => {
     mint: PublicKey
   ): Promise<PublicKey> => {
     console.log('getOrCreateAssociatedAccount');
-    if (!publicKey) throw new WalletNotConnectedError();
+    if (!destPublicKey) throw new WalletNotConnectedError();
 
     const associatedDestinationTokenAddr =
       await Token.getAssociatedTokenAddress(
-        strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
-        publicKey,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+        TOKEN_PROGRAM_ID,
         mint,
         destPublicKey
       );
@@ -48,55 +48,47 @@ export const CreateListingExample: FC = () => {
 
     console.log({ associatedDestinationAccount });
 
-    const transaction = new Transaction();
     if (
       associatedDestinationAccount !== null &&
       associatedDestinationAccount.owner.toBase58() !== destPublicKey.toBase58()
     ) {
-      transaction.add(
-        Token.createSetAuthorityInstruction(
-          TOKEN_PROGRAM_ID,
-          publicKey,
-          destPublicKey,
-          'AccountOwner',
-          publicKey,
-          []
-        )
-      );
+      console.log('Associated Destination Account Exists');
+      // transaction.add(
+      //   Token.createSetAuthorityInstruction(
+      //     TOKEN_PROGRAM_ID,
+      //     ,
+      //     destPublicKey,
+      //     'AccountOwner',
+      //     publicKey,
+      //     []
+      //   )
+      // );
     } else {
       if (associatedDestinationAccount === null) {
+        const transaction = new Transaction({
+          feePayer: destPublicKey,
+        });
+        console.log('associatedDestinationAccount === null');
         transaction.add(
           Token.createAssociatedTokenAccountInstruction(
             ASSOCIATED_TOKEN_PROGRAM_ID,
             TOKEN_PROGRAM_ID,
-            strangemood.MAINNET.STRANGEMOOD_FOUNDATION_VOTE_ACCOUNT,
+            mint,
             associatedDestinationTokenAddr,
             destPublicKey,
-            publicKey
+            destPublicKey
           )
         );
+        await sendAndConfirmWalletTransaction(
+          connection,
+          sendTransaction,
+          transaction
+        );
+        console.log('sent transaction details');
       }
-      transaction.add(
-        Token.createTransferInstruction(
-          TOKEN_PROGRAM_ID,
-          mint,
-          associatedDestinationTokenAddr,
-          publicKey,
-          [],
-          0
-        )
-      );
     }
 
-    // try {
-
-    await sendAndConfirmWalletTransaction(
-      connection,
-      sendTransaction,
-      transaction
-    );
-
-    // }
+    console.log({ associatedDestinationTokenAddr });
 
     return associatedDestinationTokenAddr;
   };
@@ -140,18 +132,16 @@ export const CreateListingExample: FC = () => {
       }
     );
 
-    console.log(transaction);
+    console.log({ createListingTransaction: transaction });
 
     const res = await sendAndConfirmWalletTransaction(
       connection,
       sendTransaction,
-      transaction.tx
-      // [
-      //   // listingTokenAccount.owner,
-      // ]
+      transaction.tx,
+      { signers: [transaction.listingMint, transaction.listing] }
     );
-
-    console.log(res);
+    console.log('finished transactions');
+    console.log({ res });
   };
 
   return (

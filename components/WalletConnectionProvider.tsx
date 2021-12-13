@@ -24,7 +24,7 @@ let networks = {
 export const WalletConnectionProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const flag = useFlag('network', 'testnet');
+  const flag = useFlag('network', 'mainnet-beta');
   const network = networks[flag];
 
   // You can also provide a custom RPC endpoint
