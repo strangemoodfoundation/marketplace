@@ -5,8 +5,6 @@ import { Keypair, Transaction, PublicKey } from '@solana/web3.js';
 import {
   Token,
   NATIVE_MINT,
-  AccountLayout,
-  MintLayout,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
@@ -29,6 +27,7 @@ export const CreateListingExample: FC = () => {
     destPublicKey: PublicKey,
     mint: PublicKey
   ): Promise<PublicKey> => {
+    console.log('getOrCreateAssociatedAccount');
     if (!publicKey) throw new WalletNotConnectedError();
 
     const associatedDestinationTokenAddr =
@@ -39,11 +38,15 @@ export const CreateListingExample: FC = () => {
         destPublicKey
       );
 
+    console.log({ associatedDestinationTokenAddr });
+
     // Get the derived address of the destination wallet which will hold the custom token.
     // This account may or may not exist(!!!)
     const associatedDestinationAccount = await connection.getAccountInfo(
       associatedDestinationTokenAddr
     );
+
+    console.log({ associatedDestinationAccount });
 
     const transaction = new Transaction();
     if (
@@ -80,32 +83,43 @@ export const CreateListingExample: FC = () => {
           associatedDestinationTokenAddr,
           publicKey,
           [],
-          1
+          0
         )
       );
     }
 
-    await sendAndConfirmWalletTransaction(connection, transaction, []);
+    // try {
+
+    await sendAndConfirmWalletTransaction(
+      connection,
+      sendTransaction,
+      transaction
+    );
+
+    // }
 
     return associatedDestinationTokenAddr;
   };
 
   const onCreateListing = async () => {
+    console.log('onCreateListing!');
     if (!publicKey) throw new WalletNotConnectedError();
 
     // TODO
-    const ARBITRARY_PRICE_FOR_NOW = 1000;
+    const ARBITRARY_PRICE_FOR_NOW = 1;
 
     // a token-specific account that only the purchaser can withdraw from
     const associatedDestinationTokenAddr = await getOrCreateAssociatedAccount(
       publicKey,
       strangemood.MAINNET.STRANGEMOOD_FOUNDATION_MINT
     );
+    console.log({ associatedDestinationTokenAddr });
 
     const associatedAccountWrappedSolAddr = await getOrCreateAssociatedAccount(
       publicKey,
       NATIVE_MINT
     );
+    console.log({ associatedAccountWrappedSolAddr });
 
     const transaction = await strangemood.client.createListingInstruction(
       connection,
@@ -126,9 +140,18 @@ export const CreateListingExample: FC = () => {
       }
     );
 
-    sendAndConfirmWalletTransaction(connection, transaction.tx, [
-      // listingTokenAccount.owner,
-    ]);
+    console.log(transaction);
+
+    const res = await sendAndConfirmWalletTransaction(
+      connection,
+      sendTransaction,
+      transaction.tx
+      // [
+      //   // listingTokenAccount.owner,
+      // ]
+    );
+
+    console.log(res);
   };
 
   return (

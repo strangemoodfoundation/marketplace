@@ -54,7 +54,7 @@ export const CreateWrappedNativeAccountExample: FC = () => {
     );
 
     // Send the three instructions
-    sendAndConfirmWalletTransaction(connection, transaction, [newAccount]);
+    sendAndConfirmWalletTransaction(connection, sendTransaction, transaction);
 
     return newAccount.publicKey;
   };

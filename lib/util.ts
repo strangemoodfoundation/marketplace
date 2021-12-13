@@ -1,5 +1,4 @@
 import {
-  Account,
   Connection,
   Keypair,
   PublicKey,
@@ -8,14 +7,7 @@ import {
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
-import {
-  Token,
-  NATIVE_MINT,
-  AccountLayout,
-  MintLayout,
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+import { Token, NATIVE_MINT, AccountLayout } from '@solana/spl-token';
 import {
   SendTransactionOptions,
   WalletNotConnectedError,
@@ -24,22 +16,30 @@ import strangemood from '@strangemood/strangemood';
 
 export const sendAndConfirmWalletTransaction = async (
   connection: Connection,
+  sendTransaction: (
+    transaction: Transaction,
+    connection: Connection,
+    options?: SendTransactionOptions
+  ) => Promise<TransactionSignature>,
   transaction: Transaction,
-  signers: Signer[],
   options?: SendTransactionOptions
 ): Promise<TransactionSignature> => {
-  const signature = await connection.sendTransaction(transaction, signers, {
+  const signature = await sendTransaction(transaction, connection, {
     preflightCommitment: 'recent',
     skipPreflight: false,
     ...options,
   });
   await connection.confirmTransaction(signature, 'processed');
-
   return signature;
 };
 
 export const createWrappedNativeAccount = async (
   connection: Connection,
+  sendTransaction: (
+    transaction: Transaction,
+    connection: Connection,
+    options?: SendTransactionOptions
+  ) => Promise<TransactionSignature>,
   publicKey: PublicKey,
   amount: number
 ) => {
@@ -82,7 +82,12 @@ export const createWrappedNativeAccount = async (
   ); // Send the three instructions
 
   // TODO: do i need any additional signers ??
-  await sendAndConfirmWalletTransaction(connection, transaction, [newAccount]);
+  await sendAndConfirmWalletTransaction(
+    connection,
+    sendTransaction,
+    transaction
+    // [newAccount]
+  );
 
   return newAccount.publicKey;
 };

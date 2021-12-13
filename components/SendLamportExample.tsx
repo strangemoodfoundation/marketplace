@@ -19,7 +19,11 @@ export const SendOneLamportToRandomAddress: FC = () => {
       })
     );
 
-    await sendAndConfirmWalletTransaction(connection, transaction, []);
+    await sendAndConfirmWalletTransaction(
+      connection,
+      sendTransaction,
+      transaction
+    );
   }, [publicKey, sendTransaction, connection]);
 
   return (

@@ -13,6 +13,8 @@ import { useRouter } from 'next/router';
 import { useFlag } from '../lib/useFlag';
 import { CreateWrappedNativeAccountExample } from '../components/CreateWrappedNativeAccountExample';
 import { GetAccountListingsExample } from '../components/GetAccountListingExample';
+import { CreateListingExample } from '../components/CreateListingExample';
+import { PurchaseListingExample } from '../components/PurchaseListingExample';
 
 const Home: NextPage = () => {
   // const network = useFlag('network', 'mainnet-beta');
@@ -34,6 +36,8 @@ const Home: NextPage = () => {
         <SendOneLamportToRandomAddress />
         <CreateWrappedNativeAccountExample />
         <GetAccountListingsExample />
+        <CreateListingExample />
+        <PurchaseListingExample />
 
         {/* <button
           className="px-4 border"

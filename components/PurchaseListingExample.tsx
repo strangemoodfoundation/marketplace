@@ -8,13 +8,11 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import React, { FC } from 'react';
-import strangemood from '@strangemood/strangemood';
-import { getListingAccount } from '@strangemood/strangemood/dist/strangemood';
+import strangemood, { ListingAccount } from '@strangemood/strangemood';
 import {
   createWrappedNativeAccount,
   sendAndConfirmWalletTransaction,
 } from '../lib/util';
-import { ListingAccount } from '../../strangemood/js/dist/strangemood/types';
 
 export const PurchaseListingExample: FC = () => {
   const { connection } = useConnection();
@@ -81,7 +79,11 @@ export const PurchaseListingExample: FC = () => {
       );
     }
 
-    await sendAndConfirmWalletTransaction(connection, transaction, []);
+    await sendAndConfirmWalletTransaction(
+      connection,
+      sendTransaction,
+      transaction
+    );
     return associatedDestinationTokenAddr;
   };
 
@@ -89,7 +91,7 @@ export const PurchaseListingExample: FC = () => {
     if (!publicKey) throw new WalletNotConnectedError();
 
     // details about the listing we are purchasing
-    const listingAccount = await getListingAccount(
+    const listingAccount = await strangemood.client.getListingAccount(
       connection,
       listingPublicKey
     );
@@ -103,6 +105,7 @@ export const PurchaseListingExample: FC = () => {
     // wrapped sol in a pre-paid account to pay for the listing
     let solTokenAccountToPayWith = await createWrappedNativeAccount(
       connection,
+      sendTransaction,
       publicKey,
       listingAccount.data.price.toNumber()
     );
@@ -129,12 +132,11 @@ export const PurchaseListingExample: FC = () => {
       },
     });
 
-    sendAndConfirmWalletTransaction(connection, transaction, [
-      // listingTokenAccount.owner,
-    ]);
+    sendAndConfirmWalletTransaction(connection, sendTransaction, transaction);
   };
 
   const onPurchaseListing = () => {
+    console.log('Purchasing Listing');
     const exampleListingAcct = Keypair.generate();
 
     purchaseListing(exampleListingAcct.publicKey);
