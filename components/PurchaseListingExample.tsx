@@ -116,7 +116,7 @@ export const PurchaseListingExample: FC = () => {
         strangemood.MAINNET.STRANGEMOOD_FOUNDATION_CHARTER_GOVERNANCE,
       charter: strangemood.MAINNET.STRANGEMOOD_FOUNDATION_CHARTER,
       realm: strangemood.MAINNET.STRANGEMOOD_FOUNDATION_REALM,
-      governanceProgramId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      governanceProgramId: strangemood.MAINNET.GOVERNANCE_PROGRAM_ID,
       communityMint: strangemood.MAINNET.STRANGEMOOD_FOUNDATION_MINT,
     };
 

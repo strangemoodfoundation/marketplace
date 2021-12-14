@@ -16,9 +16,6 @@ import {
 } from '../lib/util';
 
 export const CreateListingExample: FC = () => {
-  const [wrappedNativeAccount, setWrappedNativeAccount] = useState<
-    undefined | Keypair
-  >(undefined);
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
 
@@ -128,7 +125,7 @@ export const CreateListingExample: FC = () => {
           strangemood.MAINNET.STRANGEMOOD_FOUNDATION_CHARTER_GOVERNANCE,
         charter: strangemood.MAINNET.STRANGEMOOD_FOUNDATION_CHARTER,
         realm: strangemood.MAINNET.STRANGEMOOD_FOUNDATION_REALM,
-        governanceProgramId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+        governanceProgramId: strangemood.MAINNET.GOVERNANCE_PROGRAM_ID,
       }
     );
 
