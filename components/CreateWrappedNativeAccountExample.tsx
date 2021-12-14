@@ -1,30 +1,11 @@
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 
-import {
-  AccountInfo,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from '@solana/web3.js';
-import { Token, NATIVE_MINT } from '@solana/spl-token';
+import { Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { Token, NATIVE_MINT, AccountLayout } from '@solana/spl-token';
 import React, { FC, useState } from 'react';
 import strangemood from '@strangemood/strangemood';
-
-// const AccountLayout = BufferLayout__namespace.struct([
-//   publicKey('mint'),
-//   publicKey('owner'),
-//   uint64('amount'),
-//   BufferLayout__namespace.u32('delegateOption'),
-//   publicKey('delegate'),
-//   BufferLayout__namespace.u8('state'),
-//   BufferLayout__namespace.u32('isNativeOption'),
-//   uint64('isNative'),
-//   uint64('delegatedAmount'),
-//   BufferLayout__namespace.u32('closeAuthorityOption'),
-//   publicKey('closeAuthority'),
-// ]);
+import { sendAndConfirmWalletTransaction } from '../lib/util';
 
 export const CreateWrappedNativeAccountExample: FC = () => {
   const [wrappedNativeAccountId, setWrappedNativeAccountId] = useState<
@@ -48,9 +29,7 @@ export const CreateWrappedNativeAccountExample: FC = () => {
         fromPubkey: publicKey,
         newAccountPubkey: newAccount.publicKey,
         lamports: balanceNeeded,
-
-        //   TODO:
-        space: 1, // AccountLayout.span,
+        space: AccountLayout.span,
         programId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
       })
     ); // Send lamports to it (these will be wrapped into native tokens by the token program)
@@ -72,10 +51,10 @@ export const CreateWrappedNativeAccountExample: FC = () => {
         newAccount.publicKey,
         publicKey
       )
-    ); // Send the three instructions
+    );
 
-    const signature = await sendTransaction(transaction, connection);
-    await connection.confirmTransaction(signature, 'processed');
+    // Send the three instructions
+    sendAndConfirmWalletTransaction(connection, sendTransaction, transaction);
 
     return newAccount.publicKey;
   };
