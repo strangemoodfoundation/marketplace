@@ -25,10 +25,15 @@ export const PurchaseListingExample: FC = () => {
   ): Promise<PublicKey> => {
     if (!publicKey) throw new WalletNotConnectedError();
 
+    console.log('----------------------here');
+    console.log(listingAccount.data.mint.toString());
+    console.log(destPublicKey.toString());
+    console.log('-----------------------');
+
     const associatedDestinationTokenAddr =
       await Token.getAssociatedTokenAddress(
-        strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
-        publicKey,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+        TOKEN_PROGRAM_ID,
         listingAccount.data.mint,
         destPublicKey
       );
@@ -39,56 +44,45 @@ export const PurchaseListingExample: FC = () => {
       associatedDestinationTokenAddr
     );
 
-    const transaction = new Transaction();
+    console.log('does this exist??');
+    console.log(associatedDestinationAccount?.data);
+
     if (
       associatedDestinationAccount !== null &&
       associatedDestinationAccount.owner.toBase58() !== destPublicKey.toBase58()
     ) {
-      transaction.add(
-        Token.createSetAuthorityInstruction(
-          TOKEN_PROGRAM_ID,
-          publicKey,
-          destPublicKey,
-          'AccountOwner',
-          publicKey,
-          []
-        )
-      );
+      console.log('Associated Destination Account Exists');
     } else {
+      const transaction = new Transaction();
+      console.log('Associated Destination Account does not exist!');
       if (associatedDestinationAccount === null) {
         transaction.add(
           Token.createAssociatedTokenAccountInstruction(
             ASSOCIATED_TOKEN_PROGRAM_ID,
+            // strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
             TOKEN_PROGRAM_ID,
-            listingAccount.data.communityTokenAccount,
+            listingAccount.data.mint,
             associatedDestinationTokenAddr,
             destPublicKey,
-            publicKey
+            destPublicKey
           )
         );
       }
-      transaction.add(
-        Token.createTransferInstruction(
-          TOKEN_PROGRAM_ID,
-          listingAccount.data.mint,
-          associatedDestinationTokenAddr,
-          publicKey,
-          [],
-          1
-        )
+
+      await sendAndConfirmWalletTransaction(
+        connection,
+        sendTransaction,
+        transaction
       );
     }
 
-    await sendAndConfirmWalletTransaction(
-      connection,
-      sendTransaction,
-      transaction
-    );
     return associatedDestinationTokenAddr;
   };
 
   const purchaseListing = async (listingPublicKey: PublicKey) => {
     if (!publicKey) throw new WalletNotConnectedError();
+
+    console.log('------------- 1. Purchasing Listing');
 
     // details about the listing we are purchasing
     const listingAccount = await strangemood.client.getListingAccount(
@@ -96,19 +90,32 @@ export const PurchaseListingExample: FC = () => {
       listingPublicKey
     );
 
-    // a token-specific account that only the purchaser can withdraw from
+    console.log({ listingAccount });
+
+    // a token-specific account that only the purchaser can withdraw from....
+    // should this be for the listing ? or ... for que
     let associatedDestinationTokenAddr = await getOrCreateAssociatedAccount(
       publicKey,
       listingAccount
     );
 
+    console.log('------------- 2. Purchasing Listing');
+
+    console.log(
+      'WE DERIVED ASSOCAITED DEST!',
+      associatedDestinationTokenAddr.toString()
+    );
+
     // wrapped sol in a pre-paid account to pay for the listing
+
     let solTokenAccountToPayWith = await createWrappedNativeAccount(
       connection,
       sendTransaction,
       publicKey,
       listingAccount.data.price.toNumber()
     );
+
+    console.log('------------- 3. Purchasing Listing');
 
     const params = {
       listing: listingPublicKey,
@@ -120,32 +127,52 @@ export const PurchaseListingExample: FC = () => {
       communityMint: strangemood.MAINNET.STRANGEMOOD_FOUNDATION_MINT,
     };
 
+    console.log(listingAccount.owner.toString());
     const transaction = await strangemood.client.purchaseListingInstruction({
       listingAccount,
       params,
       conn: connection,
       strangemoodProgramId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
       publicKeys: {
-        solTokenAccountToPayWith,
+        solTokenAccountToPayWith: solTokenAccountToPayWith.publicKey,
         signerPubkey: publicKey,
         listingTokenAccountAddress: associatedDestinationTokenAddr,
       },
     });
 
-    sendAndConfirmWalletTransaction(connection, sendTransaction, transaction);
+    console.log({ transactionPreSent: transaction });
+
+    try {
+      const res = await sendAndConfirmWalletTransaction(
+        connection,
+        sendTransaction,
+        transaction
+        // { signers: [solTokenAccountToPayWith] }
+      );
+
+      console.log({ resultingTransaction: res });
+      console.log('------------- 4. Purchasing Listing');
+    } catch (err) {
+      console.log(publicKey.toString());
+      console.log(solTokenAccountToPayWith.toString());
+      console.log(transaction.signatures[0].publicKey.toString());
+      console.log(transaction.signatures[1].publicKey.toString());
+    }
   };
 
   const onPurchaseListing = () => {
     console.log('Purchasing Listing');
-    const exampleListingAcct = Keypair.generate();
+    const exampleListingPubKey = new PublicKey(
+      '9rhc18pctFC1JxxYJGroi4uh72DzVykc8WaXXCbH16LN'
+    );
 
-    purchaseListing(exampleListingAcct.publicKey);
+    purchaseListing(exampleListingPubKey);
   };
 
   return (
     <div>
       <button onClick={onPurchaseListing} disabled={!publicKey}>
-        Purchase Listing
+        Purchase Listing 9rhc18pctFC1JxxYJGroi4uh72DzVykc8WaXXCbH16LN
       </button>
     </div>
   );

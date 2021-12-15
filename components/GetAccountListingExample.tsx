@@ -19,6 +19,16 @@ export const GetAccountListingsExample: FC = () => {
     console.log('getting listings');
     if (!publicKey) throw new WalletNotConnectedError();
 
+    const listingRes1 = await strangemood.client.getListingAccount(
+      connection,
+      new PublicKey('9rhc18pctFC1JxxYJGroi4uh72DzVykc8WaXXCbH16LN')
+    );
+    console.log('RESS', listingRes1);
+
+    // 2xg9nw4KjxA9mAvNnLmnNzqZ7MFUayFPLrwQR75W4pG5
+    // 9rhc18pctFC1JxxYJGroi4uh72DzVykc8WaXXCbH16LN
+    // H5uw6GzzcF8nnHs6dJz8XWYEcrnyjJZdADczUS9duidL
+
     const listingRes = await strangemood.client.getAllListings(
       connection,
       strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID
