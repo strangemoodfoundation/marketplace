@@ -12,7 +12,8 @@ import { CreateListingExample } from '../components/CreateListingExample';
 import { PurchaseListingExample } from '../components/PurchaseListingExample';
 import { Header } from '../components/Header';
 import { StoreNav } from '../components/StoreNav';
-import { FeaturedGallery } from '../components/FeaturedGallery';
+import { FeaturedGallery } from '../components/Discover/FeaturedGallery';
+import { FeaturedGenres } from '../components/Discover/FeaturedGenres';
 
 const Home: NextPage = () => {
   const network = useFlag('network', 'mainnet-beta');
@@ -24,6 +25,7 @@ const Home: NextPage = () => {
         <div className='max-w-2xl mx-auto'>
           <StoreNav />
           <FeaturedGallery />
+          <FeaturedGenres />
           <WalletMultiButton />
           <WalletDisconnectButton />
           <SendOneLamportToRandomAddress />
