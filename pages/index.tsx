@@ -12,6 +12,7 @@ import { CreateListingExample } from '../components/CreateListingExample';
 import { PurchaseListingExample } from '../components/PurchaseListingExample';
 import { Header } from '../components/Header';
 import { StoreNav } from '../components/StoreNav';
+import { FeaturedGallery } from '../components/FeaturedGallery';
 
 const Home: NextPage = () => {
   const network = useFlag('network', 'mainnet-beta');
@@ -22,6 +23,7 @@ const Home: NextPage = () => {
         <Header />
         <div className='max-w-2xl mx-auto'>
           <StoreNav />
+          <FeaturedGallery />
           <WalletMultiButton />
           <WalletDisconnectButton />
           <SendOneLamportToRandomAddress />

@@ -7,8 +7,8 @@ export const Header = () => {
             <p className="text-gray-400">Develop</p>
         </div>
         <div className="flex flex-row gap-3">
-            <button>Sign In</button>
-            <button className="bg-black border border-white text-white">Download</button>
+            <button className="strange-shape-reverse">Sign In</button>
+            <button className="strange-shape-reverse bg-black border border-white text-white">Download</button>
         </div>
     </div>
 }
