@@ -11,6 +11,7 @@ import { GetAccountListingsExample } from '../components/GetAccountListingExampl
 import { CreateListingExample } from '../components/CreateListingExample';
 import { PurchaseListingExample } from '../components/PurchaseListingExample';
 import { Header } from '../components/Header';
+import { StoreNav } from '../components/StoreNav';
 
 const Home: NextPage = () => {
   const network = useFlag('network', 'mainnet-beta');
@@ -19,13 +20,16 @@ const Home: NextPage = () => {
     <div className="text-xl">
       <div>
         <Header />
-        <WalletMultiButton />
-        <WalletDisconnectButton />
-        <SendOneLamportToRandomAddress />
-        <CreateWrappedNativeAccountExample />
-        <GetAccountListingsExample />
-        <CreateListingExample />
-        <PurchaseListingExample />
+        <div className='max-w-2xl mx-auto'>
+          <StoreNav />
+          <WalletMultiButton />
+          <WalletDisconnectButton />
+          <SendOneLamportToRandomAddress />
+          <CreateWrappedNativeAccountExample />
+          <GetAccountListingsExample />
+          <CreateListingExample />
+          <PurchaseListingExample />
+        </div>
 
         {/* <button
           className="px-4 border"
