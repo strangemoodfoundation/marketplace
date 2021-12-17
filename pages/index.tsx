@@ -10,6 +10,7 @@ import { CreateWrappedNativeAccountExample } from '../components/CreateWrappedNa
 import { GetAccountListingsExample } from '../components/GetAccountListingExample';
 import { CreateListingExample } from '../components/CreateListingExample';
 import { PurchaseListingExample } from '../components/PurchaseListingExample';
+import { Header } from '../components/Header';
 
 const Home: NextPage = () => {
   const network = useFlag('network', 'mainnet-beta');
@@ -17,6 +18,7 @@ const Home: NextPage = () => {
   return (
     <div className="text-xl">
       <div>
+        <Header />
         <WalletMultiButton />
         <WalletDisconnectButton />
         <SendOneLamportToRandomAddress />

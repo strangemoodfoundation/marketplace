@@ -15,6 +15,18 @@ a {
   text-decoration: none;
 }
 
+button {
+  @apply bg-white;
+  @apply text-black;
+  @apply text-base;
+  @apply px-3;
+  @apply py-2;
+  @apply rounded-tr-md;
+  @apply rounded-tl-3xl;
+  @apply rounded-bl-md;
+  @apply rounded-br-3xl;
+}
+
 * {
   box-sizing: border-box;
 }
