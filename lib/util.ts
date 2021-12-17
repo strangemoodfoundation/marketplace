@@ -7,12 +7,7 @@ import {
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
-import {
-  Token,
-  NATIVE_MINT,
-  AccountLayout,
-  TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+import { Token, NATIVE_MINT, AccountLayout } from '@solana/spl-token';
 import {
   SendTransactionOptions,
   WalletNotConnectedError,
@@ -29,7 +24,7 @@ export const sendAndConfirmWalletTransaction = async (
   transaction: Transaction,
   options?: SendTransactionOptions
 ): Promise<TransactionSignature> => {
-  console.log('sendAndConfirmWalletTransaction', { transaction });
+  console.log(transaction);
 
   const signature = await sendTransaction(transaction, connection, {
     preflightCommitment: 'recent',
@@ -66,16 +61,14 @@ export const createWrappedNativeAccount = async (
   ); // Create a new account
 
   const newAccount = Keypair.generate();
-  const transaction = new Transaction({
-    feePayer: publicKey,
-  });
+  const transaction = new Transaction();
   transaction.add(
     SystemProgram.createAccount({
       fromPubkey: publicKey,
       newAccountPubkey: newAccount.publicKey,
       lamports: balanceNeeded,
       space: AccountLayout.span,
-      programId: TOKEN_PROGRAM_ID, // strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      programId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
     })
   ); // Send lamports to it (these will be wrapped into native tokens by the token program)
 
@@ -91,26 +84,20 @@ export const createWrappedNativeAccount = async (
 
   transaction.add(
     Token.createInitAccountInstruction(
-      TOKEN_PROGRAM_ID,
-      // strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
       NATIVE_MINT,
       newAccount.publicKey,
       publicKey
     )
   ); // Send the three instructions
 
-  console.log('here before transaction!', transaction);
   // TODO: do i need any additional signers ??
-  try {
-    await sendAndConfirmWalletTransaction(
-      connection,
-      sendTransaction,
-      transaction,
-      { signers: [newAccount] }
-    );
-  } catch (err) {
-    throw new Error('failed to confirm trasnaction');
-  }
+  await sendAndConfirmWalletTransaction(
+    connection,
+    sendTransaction,
+    transaction,
+    { signers: [newAccount] }
+  );
 
-  return newAccount;
+  return newAccount.publicKey;
 };
