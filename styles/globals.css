@@ -15,6 +15,28 @@ a {
   text-decoration: none;
 }
 
+.strange-shape {
+  @apply rounded-tl-xl;
+  @apply rounded-tr-3xl;
+  @apply rounded-br-xl;
+  @apply rounded-bl-3xl;
+}
+
+.strange-shape-reverse {
+  @apply rounded-tr-xl;
+  @apply rounded-tl-3xl;
+  @apply rounded-bl-xl;
+  @apply rounded-br-3xl;
+}
+
+button {
+  @apply bg-white;
+  @apply text-black;
+  @apply text-base;
+  @apply px-3;
+  @apply py-2;
+}
+
 * {
   box-sizing: border-box;
 }
