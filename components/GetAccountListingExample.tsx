@@ -6,10 +6,7 @@ import React, { FC, useState } from 'react';
 import strangemood from '@strangemood/strangemood';
 import _ from 'lodash';
 
-type ListingResponseType = { pubkey: PublicKey; account: AccountInfo<Buffer> };
-
 export const GetAccountListingsExample: FC = () => {
-  // const [listings, setListings] = useState<ListingResponseType[]>([]);
   const [listings, setListings] = useState<string[]>([]);
 
   const { connection } = useConnection();
