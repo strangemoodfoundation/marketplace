@@ -43,10 +43,7 @@ function useListings(): Array<{
   useEffect(() => {
     if (!program) return;
 
-    console.log('listings', program);
-
     program.account.listing.all().then((listings) => {
-      console.log('got listings');
       setState(listings);
     });
   }, [!!program]);
