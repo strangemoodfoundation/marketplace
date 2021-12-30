@@ -8,7 +8,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
 import { PublicKey } from '@solana/web3.js';
 import { useAnchorProvider } from '../../lib/useAnchor';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletMultiButton, WalletDisconnectButton } from '@solana/wallet-adapter-react-ui';
 import { Program } from '@project-serum/anchor';
 import { useRouter } from 'next/router'
 import ErrorPage from 'next/error'
@@ -59,6 +59,9 @@ export default function Page() {
     const provider = useAnchorProvider();
     const { listingPublicKey } = useRouter().query;
     const listing = useListing(listingPublicKey as string);
+    const listingMetaData = {
+        "title": "XCOM"
+    };
 
     async function onPurchaseListing(account: Listing) {
         if (!publicKey || !listingPublicKey) {
@@ -92,16 +95,26 @@ export default function Page() {
         return "This listing is not available"
     } else {
         return (
-            <div>
-                {!publicKey && <WalletMultiButton />}
-                <div>Transaction sig: {signature}</div>
-                {listingPublicKey}
+            <div className='max-w-xl mx-auto flex flex-col content-center p-5'>
+                <h1 className="font-bold text-3xl">{listingMetaData.title}</h1>
+                <h2 className="text-xl">Price (SOL): {listing.price.toString()}</h2>
+                <h2 className="font-bold text-2xl">Purchase</h2>
+                <h3 className="text-xl text-left">1. Connect wallet</h3>
+                <p>Connect to supproted solana wallets.</p>
+                <div className='w-1/4'>
+                    {!publicKey && <WalletMultiButton />}
+                    {publicKey && <WalletDisconnectButton />}
+                </div>
+                <h3 className="text-xl text-left">2. Sign transaction</h3>
+                <p>Purchase {listingMetaData.title} for {listing.price.toString()} SOL</p>
                 <button
-                    className="border hover:bg-blue-200"
+                    className="border hover:bg-blue-700 w-1/4 bg-blue-500 text-white font-bold rounded-lg"
                     onClick={() => onPurchaseListing(listing)}
                 >
-                    {listing.price.toString()}
+                    Purchase
                 </button>
+                <h3 className="text-xl text-left">3. Confirm transaction</h3>
+                <div>Transaction sig: {signature}</div>
             </div>
         );
     }
