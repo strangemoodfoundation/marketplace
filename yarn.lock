@@ -663,10 +663,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strangemood/strangemood@0.0.0-28":
-  version "0.0.0-28"
-  resolved "https://registry.yarnpkg.com/@strangemood/strangemood/-/strangemood-0.0.0-28.tgz#1246bcc07d83fffe7c943dc19066cd02747631b5"
-  integrity sha512-gySiqP3dcnbNkyPsgq6bmijZgV68Js8kN5DoLtjtbdXKbgmPq6Mu0Dew2fjU6nqBXDCyBAcfApesT/tJQaBggQ==
+"@strangemood/strangemood@0.0.0-32":
+  version "0.0.0-32"
+  resolved "https://registry.yarnpkg.com/@strangemood/strangemood/-/strangemood-0.0.0-32.tgz#1d74f106b72f01080213e91af09f64a352ed54e2"
+  integrity sha512-acXU5ij0Z9kzpGkFrLfXO+U3nRgONJg/+ZaMlS39hVXE6MldI85wXh8rxo4IOK/XaIGqPFJdPEJ0iizp6mGLMA==
   dependencies:
     "@project-serum/anchor" "^0.18.2"
     "@solana/buffer-layout" "^4.0.0"
@@ -4303,6 +4303,11 @@ supports-color@^8.0.0:
   integrity sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==
   dependencies:
     has-flag "^4.0.0"
+
+swr@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-1.1.2.tgz#9f3de2541931fccf03c48f322f1fc935a7551612"
+  integrity sha512-UsM0eo5T+kRPyWFZtWRx2XR5qzohs/LS4lDC0GCyLpCYFmsfTk28UCVDbOE9+KtoXY4FnwHYiF+ZYEU3hnJ1lQ==
 
 tailwindcss@^3.0.0:
   version "3.0.7"

@@ -15,7 +15,7 @@ export type OpenMetaGraphElement =
   | OpenMetaGraphLinkedElement;
 
 export interface OpenMetaGraph {
-  version: string;
+  version: '0.1.0';
   formats: string[];
   elements: OpenMetaGraphElement[];
 }
