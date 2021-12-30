@@ -34,7 +34,8 @@ export default function Page() {
   return (
     <div className="bg-blue-50 flex h-full px-4">
       <div className="max-w-2xl bg-white p-4 border-gray-300 border-l border-r w-full m-auto flex flex-col h-full">
-        <h1 className="font-bold ">Create a new listing</h1>
+        <h1 className="font-bold text-xl">New Listing</h1>
+        <p></p>
 
         <label className="flex flex-col mt-4">
           Title
@@ -47,7 +48,7 @@ export default function Page() {
           />
         </label>
 
-        <label className="flex flex-col mt-4 flex-1">
+        <label className="flex flex-col mt-4 mb-4">
           Description
           <textarea
             className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
