@@ -1,68 +1,42 @@
 import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { PublicKey } from '@solana/web3.js';
+import {
+  fetchStrangemoodProgram,
+  Listing,
+  MAINNET,
+} from '@strangemood/strangemood';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import { tob58 } from '../../lib/b58';
-
-const SERVICES_URL = 'https://api.strangemood.org';
+import { useAnchorProvider } from '../../lib/useAnchor';
 
 function Page() {
   const router = useRouter();
   const listingPubkey = router.query.pubkey;
   const { publicKey, sendTransaction, signMessage } = useWallet();
+  const provider = useAnchorProvider();
+  const [listing, setListing] = useState<Listing>();
 
-  async function postMetadata() {
-    if (!signMessage) return;
+  useEffect(() => {
+    async function load() {
+      console.log('hello', listingPubkey);
+      if (!provider) return;
+      const strangemood = await fetchStrangemoodProgram(
+        provider,
+        MAINNET.STRANGEMOOD_PROGRAM_ID
+      );
 
-    let challengeResponse = await fetch(
-      SERVICES_URL + '/v1/challenge/' + publicKey,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          scope: `listing/${listingPubkey}`,
-        }),
-      }
-    );
-
-    const challenge = await challengeResponse.text();
-    let msg = Buffer.from(challenge);
-    const result = await signMessage(msg);
-    const signature = tob58(result);
-
-    let listingResponse = await fetch(
-      SERVICES_URL + '/v1/listings/' + listingPubkey,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: signature,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          version: '0.0.1',
-          elements: [
-            {
-              key: 'title',
-              type: 'plain/text',
-              value: 'Cool Boy 123',
-            },
-          ],
-        }),
-      }
-    );
-
-    console.log(await listingResponse.json());
-  }
+      const listing = await strangemood.account.listing.fetch(
+        listingPubkey as string
+      );
+      setListing(listing);
+    }
+    load();
+  }, [provider]);
 
   return (
-    <div>
-      {!publicKey && <WalletMultiButton />}
-      <div>
-        <button onClick={postMetadata}>{listingPubkey}</button>
-      </div>
+    <div className="mx-auto max-w-2xl py-4">
+      <div>{listingPubkey}</div>
+      <pre>{JSON.stringify(listing, null, 2)}</pre>
     </div>
   );
 }

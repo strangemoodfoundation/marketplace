@@ -6,6 +6,7 @@ import {
   MAINNET,
   pda,
   Strangemood,
+  initListing,
 } from '@strangemood/strangemood';
 import { CID, create, urlSource } from 'ipfs-http-client';
 import { FormEvent, useRef, useState } from 'react';
@@ -16,6 +17,7 @@ import useSWR from 'swr';
 import { SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import * as splToken from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import { useRouter } from 'next/router';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
@@ -39,95 +41,6 @@ function useSolPrice() {
 
 const LAMPORTS_PER_SOL = 1000000;
 
-export async function initListing(
-  program: Program<Strangemood>,
-  conn: Connection,
-  user: PublicKey,
-  price: BN,
-  uri: string
-): Promise<[Transaction, Keypair[]]> {
-  const mintKeypair = Keypair.generate();
-
-  let tx = new Transaction();
-
-  let [listingMintAuthority, listingMintBump] = await pda.mint(
-    program.programId,
-    mintKeypair.publicKey
-  );
-  let [listingPDA, listingBump] = await pda.listing(
-    program.programId,
-    mintKeypair.publicKey
-  );
-
-  // Find or create an associated vote token account
-  let associatedVoteAddress = await splToken.Token.getAssociatedTokenAddress(
-    splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-    splToken.TOKEN_PROGRAM_ID,
-    MAINNET.STRANGEMOOD_FOUNDATION_MINT,
-    user
-  );
-  if (!(await conn.getAccountInfo(associatedVoteAddress))) {
-    tx.add(
-      splToken.Token.createAssociatedTokenAccountInstruction(
-        splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-        splToken.TOKEN_PROGRAM_ID,
-        MAINNET.STRANGEMOOD_FOUNDATION_MINT,
-        associatedVoteAddress,
-        user,
-        user
-      )
-    );
-  }
-
-  // Find or create an associated wrapped sol account
-  let associatedSolAddress = await splToken.Token.getAssociatedTokenAddress(
-    splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-    splToken.TOKEN_PROGRAM_ID,
-    splToken.NATIVE_MINT,
-    user
-  );
-  if (!(await conn.getAccountInfo(associatedSolAddress))) {
-    tx.add(
-      splToken.Token.createAssociatedTokenAccountInstruction(
-        splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-        splToken.TOKEN_PROGRAM_ID,
-        splToken.NATIVE_MINT,
-        associatedSolAddress,
-        user,
-        user
-      )
-    );
-  }
-
-  let init_instruction_ix = program.instruction.initListing(
-    listingMintBump,
-    listingBump,
-    price,
-    uri,
-    {
-      accounts: {
-        listing: listingPDA,
-        mint: mintKeypair.publicKey,
-        mintAuthorityPda: listingMintAuthority,
-        rent: SYSVAR_RENT_PUBKEY,
-        solDeposit: associatedSolAddress,
-        voteDeposit: associatedVoteAddress,
-        realm: MAINNET.STRANGEMOOD_FOUNDATION_REALM,
-        governanceProgram: MAINNET.GOVERNANCE_PROGRAM_ID,
-        charter: MAINNET.STRANGEMOOD_FOUNDATION_CHARTER,
-        charterGovernance: MAINNET.STRANGEMOOD_FOUNDATION_CHARTER_GOVERNANCE,
-        tokenProgram: splToken.TOKEN_PROGRAM_ID,
-        user: user,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [mintKeypair],
-    }
-  );
-  tx.add(init_instruction_ix);
-
-  return [tx, [mintKeypair]];
-}
-
 export default function Page() {
   const ipfs = useIpfs();
   const { connection } = useConnection();
@@ -139,6 +52,7 @@ export default function Page() {
   );
   const { publicKey, sendTransaction, connected, connecting } = useWallet();
   const provider = useAnchorProvider();
+  const router = useRouter();
 
   async function onSave() {
     if (!publicKey) return;
@@ -168,21 +82,28 @@ export default function Page() {
 
     const { cid } = await ipfs.add(JSON.stringify(metadata));
 
-    const [tx, signers] = await initListing(
+    const {
+      tx,
+      signers,
+      publicKey: listingPubkey,
+    } = await initListing(
       strangemood as any,
       connection,
       publicKey,
       new BN(price).mul(new BN(LAMPORTS_PER_SOL)),
       'ipfs://' + cid
     );
-    await sendTransaction(tx, connection, { signers });
+    let sig = await sendTransaction(tx, connection, { signers });
+    await provider.connection.confirmTransaction(sig);
 
     console.log(
       'created listing at: ',
-      publicKey.toString(),
+      listingPubkey.toString(),
       ' with metadata at ',
       'ipfs://' + cid
     );
+
+    router.push(`/listings/${listingPubkey.toString()}`);
   }
 
   if (!publicKey) {
