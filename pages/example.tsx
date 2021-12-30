@@ -9,7 +9,7 @@ import {
 import * as anchor from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
-import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { useAnchorProvider } from '../lib/useAnchor';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Program } from '@project-serum/anchor';

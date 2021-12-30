@@ -5,7 +5,6 @@ import {
 import { SendOneLamportToRandomAddress } from '../components/SendLamportExample';
 
 import type { NextPage } from 'next';
-import { useFlag } from '../lib/useFlag';
 import { CreateWrappedNativeAccountExample } from '../components/CreateWrappedNativeAccountExample';
 import { GetAccountListingsExample } from '../components/GetAccountListingExample';
 import { CreateListingExample } from '../components/CreateListingExample';
@@ -16,13 +15,11 @@ import { FeaturedGallery } from '../components/Discover/FeaturedGallery';
 import { FeaturedGenres } from '../components/Discover/FeaturedGenres';
 
 const Home: NextPage = () => {
-  const network = useFlag('network', 'mainnet-beta');
-
   return (
     <div className="text-xl">
       <div>
         <Header />
-        <div className='max-w-2xl mx-auto'>
+        <div className="max-w-2xl mx-auto">
           <StoreNav />
           <FeaturedGallery />
           <FeaturedGenres />

@@ -28,7 +28,10 @@ export const WalletConnectionProvider: FC<{ children: ReactNode }> = ({
   const network = networks[flag];
 
   // You can also provide a custom RPC endpoint
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint =
+    flag == 'mainnet-beta'
+      ? 'https://rpc-mainnet.rebasefoundation.org/'
+      : "'https://rpc-testnet.rebasefoundation.org/'";
 
   // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking --
   // Only the wallets you configure here will be compiled into your application
