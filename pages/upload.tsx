@@ -14,9 +14,7 @@ import Login from '../components/Login';
 import { OpenMetaGraph } from '../lib/omg';
 import { useAnchorProvider } from '../lib/useAnchor';
 import useSWR from 'swr';
-import { SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
-import * as splToken from '@solana/spl-token';
-import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+
 import { useRouter } from 'next/router';
 
 function useIpfs() {
