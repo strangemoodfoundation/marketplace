@@ -10,7 +10,7 @@ const Home: NextPage = () => {
   const provider = useAnchorProvider();
 
   return (
-    <div className="w-full h-full bg-blue-50">
+    <div className="w-full bg-blue-50 scroll-auto">
       <div
         className={
           'm-auto h-full px-4 py-4 max-w-2xl bg-white border-l border-r'
@@ -33,7 +33,7 @@ const Home: NextPage = () => {
           <GameView
             key={l.publicKey.toString()}
             publicKey={l.publicKey.toString()}
-            provider={provider}
+            listingAccount={l.account}
           />
         ))}
       </div>

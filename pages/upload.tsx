@@ -14,27 +14,14 @@ import Login from '../components/Login';
 import { OpenMetaGraph } from '../lib/omg';
 import { useAnchorProvider } from '../lib/useAnchor';
 import useSWR from 'swr';
+import cn from 'classnames';
 
 import { useRouter } from 'next/router';
+import { useSolPrice } from '../lib/useSolPrice';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
   return client;
-}
-
-// @ts-ignore
-const fetcher = (...args: any) => fetch(...args).then((res) => res.json());
-
-function useSolPrice() {
-  const { data, error } = useSWR(
-    'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd',
-    fetcher
-  );
-
-  if (!data) return 0;
-  if (error) return 0;
-
-  return data.solana.usd;
 }
 
 const LAMPORTS_PER_SOL = 1000000;
@@ -51,9 +38,13 @@ export default function Page() {
   const { publicKey, sendTransaction, connected, connecting } = useWallet();
   const provider = useAnchorProvider();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   async function onSave() {
     if (!publicKey) return;
+    if (!title || !description) return;
+
+    setIsLoading(true);
     const strangemood = await fetchStrangemoodProgram(
       provider,
       MAINNET.STRANGEMOOD_PROGRAM_ID
@@ -80,6 +71,10 @@ export default function Page() {
 
     const { cid } = await ipfs.add(JSON.stringify(metadata));
 
+    // Trick cloudflare into caching our metadata early
+    // which makes the next page load faster
+    fetch('https://cloudflare-ipfs.com/ipfs' + cid);
+
     const {
       tx,
       signers,
@@ -88,20 +83,14 @@ export default function Page() {
       strangemood as any,
       connection,
       publicKey,
-      new BN(price).mul(new BN(LAMPORTS_PER_SOL)),
+      new BN(price * LAMPORTS_PER_SOL),
       'ipfs://' + cid
     );
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
 
-    console.log(
-      'created listing at: ',
-      listingPubkey.toString(),
-      ' with metadata at ',
-      'ipfs://' + cid
-    );
-
     router.push(`/listings/${listingPubkey.toString()}`);
+    setIsLoading(false);
   }
 
   if (!publicKey) {
@@ -111,7 +100,12 @@ export default function Page() {
   const dollars = price * solPrice;
 
   return (
-    <div className="bg-blue-50 flex h-full px-4">
+    <div
+      className={cn({
+        'bg-blue-50 flex h-full px-4': true,
+        'animate-pulse opacity-50': isLoading,
+      })}
+    >
       <div className="max-w-2xl bg-white p-4 border-gray-300 border-l border-r w-full m-auto flex flex-col h-full">
         <h1 className="font-bold text-xl">New Listing</h1>
         <p></p>
@@ -152,8 +146,9 @@ export default function Page() {
         </label>
 
         <button
+          disabled={!title || !description}
           onClick={onSave}
-          className="flex w-32 border-blue-400 text-blue-700 border rounded-sm items-center justify-center hover:bg-blue-50"
+          className="flex w-32 border-blue-400 text-blue-700 border rounded-sm items-center justify-center hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Save
         </button>

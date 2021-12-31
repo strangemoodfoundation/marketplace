@@ -7,13 +7,17 @@ import {
 import { useRouter } from 'next/router';
 import { useAnchorProvider } from '../../lib/useAnchor';
 import GameView from '../../components/GameView';
+import { useListing } from '../../lib/useListing';
 
 function Page() {
   const router = useRouter();
   const listingPubkey = router.query.pubkey;
   const provider = useAnchorProvider();
+  const listing = useListing(provider, listingPubkey as string);
 
-  return <GameView publicKey={listingPubkey as any} provider={provider} />;
+  if (!listing) return null;
+
+  return <GameView publicKey={listingPubkey as any} listingAccount={listing} />;
 }
 
 export default Page;
