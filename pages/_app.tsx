@@ -20,11 +20,24 @@ const WalletConnectionProvider = dynamic<{ children: ReactNode }>(
 
 const MyApp: FC<AppProps> = ({ Component, pageProps }) => {
   return (
-    <WalletConnectionProvider>
-      <WalletModalProvider>
-        <Component {...pageProps} />
-      </WalletModalProvider>
-    </WalletConnectionProvider>
+    <div className="h-full bg-blue-50 flex flex-col">
+      <div>
+        {/* @ts-ignore because shutup typescript */}
+        <div className="bg-white p-2 text-center border-b-2 border-black">
+          Strangemood is an unaudited, in development, protocol that you should
+          assume is broken. By using this demo, you're accepting the risk of
+          using cryptocurrency software that is <i>explicitly</i> telling you
+          that it is probably hackable. Please report security bugs to security
+          @ strangemood . org to participate in our bug bounty program.
+          {/* @ts-ignore because shutup typescript */}
+        </div>
+      </div>
+      <WalletConnectionProvider>
+        <WalletModalProvider>
+          <Component {...pageProps} />
+        </WalletModalProvider>
+      </WalletConnectionProvider>
+    </div>
   );
 };
 export default MyApp;
