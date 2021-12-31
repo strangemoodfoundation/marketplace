@@ -89,7 +89,7 @@ export default function Page() {
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
 
-    router.push(`/listings/${listingPubkey.toString()}`);
+    router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
   }
 
