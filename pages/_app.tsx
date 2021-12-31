@@ -24,7 +24,7 @@ const MyApp: FC<AppProps> = ({ Component, pageProps }) => {
       <div>
         {/* @ts-ignore because shutup typescript */}
         <div className="bg-white p-2 text-center border-b-2 border-black">
-          Strangemood is an unaudited, in development, protocol that you should
+          Strangemood is an unaudited, in development protocol that you should
           assume is broken. By using this demo, you're accepting the risk of
           using cryptocurrency software that is <i>explicitly</i> telling you
           that it is probably hackable. Please report security bugs to security
