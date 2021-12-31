@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import { useListings } from '../lib/useListing';
 import GameView from '../components/GameView';
 import { useAnchorProvider } from '../lib/useAnchor';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
   const listings = useListings();
@@ -23,13 +24,17 @@ const Home: NextPage = () => {
             </p>
           </div>
 
-          <a href="/upload" className="underline">
-            Make a new listing
-          </a>
+          <Link href="/upload">
+            <a className="underline">Make a new listing</a>
+          </Link>
         </div>
         <br />
         {listings.map((l) => (
-          <GameView publicKey={l.publicKey.toString()} provider={provider} />
+          <GameView
+            key={l.publicKey.toString()}
+            publicKey={l.publicKey.toString()}
+            provider={provider}
+          />
         ))}
       </div>
     </div>
