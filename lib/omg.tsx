@@ -19,3 +19,7 @@ export interface OpenMetaGraph {
   formats: string[];
   elements: OpenMetaGraphElement[];
 }
+
+export function grabValue(data: OpenMetaGraph, key: string): string {
+  return (data.elements.find((e) => e.key === key) as any).value;
+}

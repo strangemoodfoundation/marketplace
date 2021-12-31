@@ -7,7 +7,9 @@ import {
   Strangemood,
 } from '@strangemood/strangemood';
 import { useEffect, useState } from 'react';
+import { OpenMetaGraph } from './omg';
 import { useAnchorProvider } from './useAnchor';
+import { useSWR } from './useSWR';
 
 function useStrangemoodProgram() {
   const provider = useAnchorProvider();
@@ -22,7 +24,17 @@ function useStrangemoodProgram() {
   return program;
 }
 
-export function useListing(provider: any, pubkey: string) {
+export function useListingMetadata(listing: any) {
+  return useSWR<OpenMetaGraph>(
+    listing &&
+      listing.uri &&
+      `https://cloudflare-ipfs.com/ipfs/${(
+        (listing?.uri as string) || ''
+      ).replace('ipfs://', '')}`
+  );
+}
+
+export function useListing(provider: any, pubkey: string): Listing {
   const [listing, setListing] = useState<Listing>();
 
   useEffect(() => {
@@ -39,7 +51,7 @@ export function useListing(provider: any, pubkey: string) {
     load();
   }, [!!provider]);
 
-  return listing;
+  return listing as Listing;
 }
 
 export function useListings(): Array<{

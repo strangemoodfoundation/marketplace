@@ -24,7 +24,7 @@ function useIpfs() {
   return client;
 }
 
-const LAMPORTS_PER_SOL = 1000000;
+const LAMPORTS_PER_SOL = 1000000000;
 
 export default function Page() {
   const ipfs = useIpfs();
