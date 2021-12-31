@@ -1,18 +1,5 @@
-import {
-  WalletDisconnectButton,
-  WalletMultiButton,
-} from '@solana/wallet-adapter-react-ui';
-import { SendOneLamportToRandomAddress } from '../components/SendLamportExample';
-
 import type { NextPage } from 'next';
-import { CreateWrappedNativeAccountExample } from '../components/CreateWrappedNativeAccountExample';
-import { GetAccountListingsExample } from '../components/GetAccountListingExample';
-import { CreateListingExample } from '../components/CreateListingExample';
-import { PurchaseListingExample } from '../components/PurchaseListingExample';
-import { Header } from '../components/Header';
-import { StoreNav } from '../components/StoreNav';
-import { FeaturedGallery } from '../components/Discover/FeaturedGallery';
-import { FeaturedGenres } from '../components/Discover/FeaturedGenres';
+
 import { useListings } from '../lib/useListing';
 import GameView from '../components/GameView';
 import { useAnchorProvider } from '../lib/useAnchor';
