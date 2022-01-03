@@ -47,6 +47,15 @@ export default async function handler(
 
   const cid = uri.replace('ipfs://', '');
 
+  if (
+    !process.env.IPFS_PINNING_SERVICE_TOKEN &&
+    process.env.NODE_ENV === 'production'
+  ) {
+    throw new Error(
+      'Unexpectedly did not find IPFS_PINNING_SERVICE_TOKEN in production'
+    );
+  }
+
   const result = await fetch('https://api.pinata.cloud/psa/pins', {
     method: 'POST',
     headers: {
