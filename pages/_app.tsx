@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/wallet-adapter.css';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import type { AppProps } from 'next/app';
 import dynamic from 'next/dynamic';
