@@ -42,7 +42,7 @@ export default function GameView(props: {
       </Link>
       <p className="">{grabValue(data, 'description').trim()}</p>
       <Link href={`/checkout/${props.publicKey}`}>
-        <button className="bg-green-300 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center">
+        <button className="bg-green-300 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center px-3 py-2">
           <div>
             <div>Purchase Listing</div>
             <div className="flex gap-1 items-center opacity-50 font-mono">

@@ -33,14 +33,6 @@ a {
   @apply rounded-br-3xl;
 }
 
-button {
-  @apply bg-white;
-  @apply text-black;
-  @apply text-base;
-  @apply px-3;
-  @apply py-2;
-}
-
 * {
   box-sizing: border-box;
 }
