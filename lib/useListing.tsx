@@ -66,12 +66,6 @@ export function useListings(): Array<{
     if (!program) return;
 
     program.account.listing.all().then((listings) => {
-      listings.forEach((l) => {
-        fetch('/api/pin/' + l.publicKey.toString(), {
-          method: 'POST',
-        });
-      });
-
       setState(listings);
     });
   }, [!!program]);

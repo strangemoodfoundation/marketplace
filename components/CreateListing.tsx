@@ -84,6 +84,11 @@ export default function CreateListing() {
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
 
+    // Pin the listing data to ensure it's kept around for a bit
+    fetch('/api/pin/' + listingPubkey.toString(), {
+      method: 'POST',
+    });
+
     router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
   }
