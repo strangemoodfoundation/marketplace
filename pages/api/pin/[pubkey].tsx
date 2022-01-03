@@ -60,7 +60,8 @@ export default async function handler(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: process.env.IPFS_PINNING_SERVICE_TOKEN as string,
+      Authorization: ('Bearer ' +
+        process.env.IPFS_PINNING_SERVICE_TOKEN) as string,
     },
     body: JSON.stringify({
       cid,
