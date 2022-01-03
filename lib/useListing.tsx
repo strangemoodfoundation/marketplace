@@ -66,9 +66,7 @@ export function useListings(): Array<{
     if (!program) return;
 
     program.account.listing.all().then((listings) => {
-      console.log('listings', listings);
       listings.forEach((l) => {
-        console.log('l', l.publicKey);
         fetch('/api/pin/' + l.publicKey.toString(), {
           method: 'POST',
         });
