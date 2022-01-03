@@ -183,7 +183,7 @@ export default function Checkout() {
         <button
           disabled={isLoading}
           onClick={() => purchase().catch(console.error)}
-          className="bg-green-300 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center disabled:cursor-wait"
+          className="bg-green-300 px-3 py-2 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center disabled:cursor-wait"
         >
           <div>
             <div>Purchase Listing {listingTokenBalance > 0 && '(again!)'}</div>
@@ -212,7 +212,7 @@ export default function Checkout() {
 
         <a href={rampLink}>
           <button
-            className="mt-4 border border-gray-300 rounded-sm text-left w-full flex justify-between items-center"
+            className="mt-4 px-3 py-2 border border-gray-300 rounded-sm text-left w-full flex justify-between items-center"
             disabled={isLoading}
           >
             <div>
