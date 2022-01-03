@@ -28,9 +28,10 @@ export function useListingMetadata(listing: any) {
   return useSWR<OpenMetaGraph>(
     listing &&
       listing.uri &&
-      `https://cloudflare-ipfs.com/ipfs/${(
-        (listing?.uri as string) || ''
-      ).replace('ipfs://', '')}`
+      `https://ipfs.io/ipfs/${((listing?.uri as string) || '').replace(
+        'ipfs://',
+        ''
+      )}`
   );
 }
 

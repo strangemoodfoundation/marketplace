@@ -61,10 +61,14 @@ function useTokenBalance(mint: PublicKey) {
           publicKey
         );
 
-      const account = await provider.connection.getTokenAccountBalance(
-        associatedTokenAccountAddress
-      );
-      setBalance(parseInt(account.value.amount || '0'));
+      try {
+        const account = await provider.connection.getTokenAccountBalance(
+          associatedTokenAccountAddress
+        );
+        setBalance(parseInt(account.value.amount || '0'));
+      } catch {
+        setBalance(0);
+      }
     }
 
     load();

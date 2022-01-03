@@ -1,10 +1,6 @@
 import { useSWR } from '../lib/useSWR';
 import { grabValue, OpenMetaGraph } from '../lib/omg';
-import {
-  fetchStrangemoodProgram,
-  Listing,
-  purchaseListing,
-} from '@strangemood/strangemood';
+import { Listing } from '@strangemood/strangemood';
 import { useSolPrice } from '../lib/useSolPrice';
 import Link from 'next/link';
 
@@ -17,9 +13,10 @@ export default function GameView(props: {
   const { data } = useSWR<OpenMetaGraph>(
     listing &&
       listing.uri &&
-      `https://cloudflare-ipfs.com/ipfs/${(
-        (listing?.uri as string) || ''
-      ).replace('ipfs://', '')}`
+      `https://ipfs.io/ipfs/${((listing?.uri as string) || '').replace(
+        'ipfs://',
+        ''
+      )}`
   );
 
   if (!listing || !listing.uri || !data) return null;
