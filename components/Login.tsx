@@ -22,7 +22,12 @@ export default function Login() {
           .
         </p>
 
-        <WalletMultiButton />
+        <div
+          className="border text-black bg-blue-50 flex items-center justify-center p-2
+        "
+        >
+          <WalletMultiButton />
+        </div>
       </div>
     </div>
   );
