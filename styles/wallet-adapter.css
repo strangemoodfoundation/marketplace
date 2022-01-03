@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
 
-.wallet-adapter-button {
+button.wallet-adapter-button {
   background-color: #404144;
   border: none;
   border-radius: 6px;
@@ -16,19 +16,19 @@
   padding: 0 20px;
 }
 
-.wallet-adapter-button-trigger {
+button.wallet-adapter-button-trigger {
   background-color: #4e44ce;
 }
 
-.wallet-adapter-button:not([disabled]):focus-visible {
+button.wallet-adapter-button:not([disabled]):focus-visible {
   outline-color: white;
 }
 
-.wallet-adapter-button:not([disabled]):hover {
+button.wallet-adapter-button:not([disabled]):hover {
   background-image: linear-gradient(rgba(0, 0, 0, 0.15) 0 0);
 }
 
-.wallet-adapter-button[disabled] {
+button.wallet-adapter-button[disabled] {
   background: #404144;
   color: #999;
   cursor: not-allowed;
