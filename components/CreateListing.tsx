@@ -44,6 +44,8 @@ export default function CreateListing() {
       CLUSTER.STRANGEMOOD_PROGRAM_ID
     );
 
+    console.log({ program: strangemood });
+
     const metadata: OpenMetaGraph = {
       version: '0.1.0',
       formats: [],
@@ -66,6 +68,8 @@ export default function CreateListing() {
     // Trick the gateway into caching our metadata early
     // which makes the next page load faster
     fetch('https://ipfs.io/ipfs/' + cid);
+
+    console.log('hello!', cid);
 
     const {
       tx,

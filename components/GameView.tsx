@@ -3,11 +3,13 @@ import { grabValue, OpenMetaGraph } from '../lib/omg';
 import { Listing } from '@strangemood/strangemood';
 import { useSolPrice } from '../lib/useSolPrice';
 import Link from 'next/link';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function GameView(props: {
   publicKey: string;
   listingAccount: Listing;
 }) {
+  const wallet = useWallet();
   const solPrice = useSolPrice();
   const listing = props.listingAccount;
   const { data } = useSWR<OpenMetaGraph>(
@@ -68,6 +70,35 @@ export default function GameView(props: {
           </svg>
         </button>
       </Link>
+      {listing.authority === wallet.publicKey && (
+        <Link href={`/edit/${props.publicKey}`}>
+          <button className="bg-orange-300 mt-4 border border-orange-700 rounded-sm text-left w-full flex justify-between items-center px-3 py-2">
+            <div>
+              <div>Edit Listing</div>
+              <div className="flex gap-1 items-center opacity-50 font-mono">
+                <div className="text-sm ">{priceInSol.toFixed(4)} SOL</div>|
+                <div className="text-sm">
+                  {(priceInSol * solPrice).toFixed(4)} USD
+                </div>
+              </div>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-orange-800"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
+            </svg>
+          </button>
+        </Link>
+      )}
     </div>
   );
 }
