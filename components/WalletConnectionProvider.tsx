@@ -24,14 +24,18 @@ let networks = {
 export const WalletConnectionProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const flag = useFlag('network', 'mainnet-beta');
+  const flag = useFlag(
+    'network',
+    process.env.NODE_ENV === 'development' ? 'testnet' : 'mainnet-beta'
+  );
   const network = networks[flag];
+  console.log({ network });
 
   // You can also provide a custom RPC endpoint
   const endpoint =
     flag == 'mainnet-beta'
       ? 'https://api.mainnet-beta.solana.com/'
-      : "'https://rpc-testnet.rebasefoundation.org/'";
+      : 'https://api.testnet.solana.com/';
 
   // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking --
   // Only the wallets you configure here will be compiled into your application

@@ -1,12 +1,12 @@
 import { Program } from '@project-serum/anchor';
-import { AccountInfo, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
   fetchStrangemoodProgram,
   Listing,
-  MAINNET,
   Strangemood,
 } from '@strangemood/strangemood';
 import { useEffect, useState } from 'react';
+import { CLUSTER } from './constants';
 import { OpenMetaGraph } from './omg';
 import { useAnchorProvider } from './useAnchor';
 import { useSWR } from './useSWR';
@@ -43,7 +43,7 @@ export function useListing(provider: any, pubkey: string): Listing {
       if (!provider) return;
       const strangemood = await fetchStrangemoodProgram(
         provider,
-        MAINNET.STRANGEMOOD_PROGRAM_ID
+        CLUSTER.STRANGEMOOD_PROGRAM_ID
       );
 
       const listing = await strangemood.account.listing.fetch(pubkey as string);

@@ -2,7 +2,6 @@ import {
   Connection,
   Keypair,
   PublicKey,
-  Signer,
   SystemProgram,
   Transaction,
   TransactionSignature,
@@ -12,7 +11,7 @@ import {
   SendTransactionOptions,
   WalletNotConnectedError,
 } from '@solana/wallet-adapter-base';
-import strangemood from '@strangemood/strangemood';
+import { CLUSTER } from './constants';
 
 export const sendAndConfirmWalletTransaction = async (
   connection: Connection,
@@ -68,7 +67,7 @@ export const createWrappedNativeAccount = async (
       newAccountPubkey: newAccount.publicKey,
       lamports: balanceNeeded,
       space: AccountLayout.span,
-      programId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      programId: CLUSTER.STRANGEMOOD_PROGRAM_ID,
     })
   ); // Send lamports to it (these will be wrapped into native tokens by the token program)
 
@@ -84,7 +83,7 @@ export const createWrappedNativeAccount = async (
 
   transaction.add(
     Token.createInitAccountInstruction(
-      strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      CLUSTER.STRANGEMOOD_PROGRAM_ID,
       NATIVE_MINT,
       newAccount.publicKey,
       publicKey

@@ -15,6 +15,7 @@ import { useAnchorProvider } from '../../lib/useAnchor';
 import { useListing, useListingMetadata } from '../../lib/useListing';
 import { useSolPrice } from '../../lib/useSolPrice';
 import * as splToken from '@solana/spl-token';
+import { CLUSTER } from '../../lib/constants';
 
 function ALink(props: { href: string; children: any }) {
   return (
@@ -101,7 +102,8 @@ export default function Checkout() {
       {
         account: listing,
         publicKey: new PublicKey(router.query.pubkey as string),
-      }
+      },
+      CLUSTER
     );
 
     const sig = await sendTransaction(tx, provider.connection, {

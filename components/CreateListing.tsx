@@ -1,10 +1,6 @@
 import { BN } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import {
-  fetchStrangemoodProgram,
-  MAINNET,
-  initListing,
-} from '@strangemood/strangemood';
+import { fetchStrangemoodProgram, initListing } from '@strangemood/strangemood';
 import { create } from 'ipfs-http-client';
 import { useState } from 'react';
 import Login from '../components/Login';
@@ -13,6 +9,7 @@ import { useAnchorProvider } from '../lib/useAnchor';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
+import { CLUSTER } from '../lib/constants';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
@@ -30,7 +27,7 @@ export default function CreateListing() {
   const [price, setPrice] = useState<number>(
     solPrice === 0 ? 0.0001 : 0.02 / solPrice
   );
-  const { publicKey, sendTransaction, connected, connecting } = useWallet();
+  const { publicKey, sendTransaction } = useWallet();
   const provider = useAnchorProvider();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +41,7 @@ export default function CreateListing() {
     setIsLoading(true);
     const strangemood = await fetchStrangemoodProgram(
       provider,
-      MAINNET.STRANGEMOOD_PROGRAM_ID
+      CLUSTER.STRANGEMOOD_PROGRAM_ID
     );
 
     const metadata: OpenMetaGraph = {
@@ -79,7 +76,8 @@ export default function CreateListing() {
       connection,
       publicKey,
       new BN(price * LAMPORTS_PER_SOL),
-      'ipfs://' + cid
+      'ipfs://' + cid,
+      CLUSTER
     );
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);

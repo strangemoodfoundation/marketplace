@@ -1,10 +1,6 @@
 import { BN } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import {
-  fetchStrangemoodProgram,
-  MAINNET,
-  initListing,
-} from '@strangemood/strangemood';
+import { fetchStrangemoodProgram, initListing } from '@strangemood/strangemood';
 import { create } from 'ipfs-http-client';
 import { useState } from 'react';
 import Login from '../components/Login';
@@ -13,6 +9,7 @@ import { useAnchorProvider } from '../lib/useAnchor';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
+import { CLUSTER } from '../lib/constants';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
@@ -38,7 +35,7 @@ export default function EditListing() {
     setIsLoading(true);
     const strangemood = await fetchStrangemoodProgram(
       provider,
-      MAINNET.STRANGEMOOD_PROGRAM_ID
+      CLUSTER.STRANGEMOOD_PROGRAM_ID
     );
 
     const metadata: OpenMetaGraph = {
