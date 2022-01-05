@@ -2,6 +2,7 @@ import {
   Connection,
   Keypair,
   PublicKey,
+  Signer,
   SystemProgram,
   Transaction,
   TransactionSignature,
@@ -12,6 +13,7 @@ import {
   WalletNotConnectedError,
 } from '@solana/wallet-adapter-base';
 import { CLUSTER } from './constants';
+import { WalletContextState } from '@solana/wallet-adapter-react';
 
 export const sendAndConfirmWalletTransaction = async (
   connection: Connection,
@@ -99,4 +101,22 @@ export const createWrappedNativeAccount = async (
   );
 
   return newAccount.publicKey;
+};
+
+export const sendAndSign = async (
+  connection: Connection,
+  wallet: WalletContextState,
+  tx: Transaction,
+  signers?: Signer[]
+) => {
+  console.log('TX:', tx);
+  const sig = await wallet.sendTransaction(tx, connection, {
+    signers,
+  });
+  console.log('SIG:', sig);
+
+  const confirmation = await connection.confirmTransaction(sig);
+  console.log('CONFIRMED TX:', confirmation);
+
+  return { tx, sig, confirmation };
 };

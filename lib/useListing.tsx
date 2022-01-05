@@ -10,6 +10,7 @@ import { CLUSTER } from './constants';
 import { OpenMetaGraph } from './omg';
 import { useAnchorProvider } from './useAnchor';
 import { useSWR } from './useSWR';
+import * as splToken from '@solana/spl-token';
 
 function useStrangemoodProgram() {
   const provider = useAnchorProvider();
@@ -71,4 +72,23 @@ export function useListings(): Array<{
   }, [!!program]);
 
   return state;
+}
+
+export async function getStrangemoodAssociatedTokenAddress(user: PublicKey) {
+  // Find or create an associated vote token account
+  const associatedVoteAddress = await splToken.Token.getAssociatedTokenAddress(
+    splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+    splToken.TOKEN_PROGRAM_ID,
+    CLUSTER.STRANGEMOOD_FOUNDATION_MINT,
+    user
+  );
+
+  const associatedSolAddress = await splToken.Token.getAssociatedTokenAddress(
+    splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+    splToken.TOKEN_PROGRAM_ID,
+    splToken.NATIVE_MINT,
+    user
+  );
+
+  return { associatedVoteAddress, associatedSolAddress };
 }

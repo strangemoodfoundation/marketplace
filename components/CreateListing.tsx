@@ -1,6 +1,10 @@
-import { BN } from '@project-serum/anchor';
+import { BN, web3 } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { fetchStrangemoodProgram, initListing } from '@strangemood/strangemood';
+import {
+  fetchStrangemoodProgram,
+  initListing,
+  setListingDeposits,
+} from '@strangemood/strangemood';
 import { create } from 'ipfs-http-client';
 import { useState } from 'react';
 import Login from '../components/Login';
@@ -10,6 +14,9 @@ import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
 import { CLUSTER } from '../lib/constants';
+import { useSharingAccount } from '../lib/useSharingAccount';
+import { getStrangemoodAssociatedTokenAddress } from '../lib/useListing';
+import { sendAndSign } from '../lib/util';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
@@ -27,15 +34,19 @@ export default function CreateListing() {
   const [price, setPrice] = useState<number>(
     solPrice === 0 ? 0.0001 : 0.02 / solPrice
   );
-  const { publicKey, sendTransaction } = useWallet();
+  const [splitPercent, setSplitPercent] = useState<number>(5.0);
+
+  const wallet = useWallet();
   const provider = useAnchorProvider();
+  const { initializeTx: initializeSharingAccount, getSharingAccountAddress } =
+    useSharingAccount();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const [imageCIDs, setImageCIDs] = useState<any[]>([]);
 
   async function onSave() {
-    if (!publicKey) return;
+    if (!wallet.publicKey) return;
     if (!title || !description) return;
 
     setIsLoading(true);
@@ -69,22 +80,42 @@ export default function CreateListing() {
     // which makes the next page load faster
     fetch('https://ipfs.io/ipfs/' + cid);
 
-    console.log('hello!', cid);
+    const tx = new web3.Transaction();
 
+    // TX 1. Create Listing
     const {
-      tx,
+      tx: createListingTx,
       signers,
       publicKey: listingPubkey,
     } = await initListing(
       strangemood as any,
       connection,
-      publicKey,
+      wallet.publicKey,
       new BN(price * LAMPORTS_PER_SOL),
       'ipfs://' + cid,
       CLUSTER
     );
-    let sig = await sendTransaction(tx, connection, { signers });
-    await provider.connection.confirmTransaction(sig);
+    tx.add(createListingTx);
+
+    // TX 2. Create Sharing Account for Affiliate Revenue
+    const { tx: initSharingTx, signers: initSharingSigners } =
+      await initializeSharingAccount(splitPercent);
+    tx.add(initSharingTx);
+
+    const { associatedSolAddress, associatedVoteAddress } =
+      await getStrangemoodAssociatedTokenAddress(wallet.publicKey);
+
+    // TX 3. Update Listing's Deposit Account to use the Sharing Account
+    const { tx: setTx } = await setListingDeposits(
+      strangemood as any,
+      wallet.publicKey,
+      listingPubkey,
+      associatedVoteAddress,
+      await getSharingAccountAddress(listingPubkey)
+    );
+    tx.add(setTx);
+
+    sendAndSign(connection, wallet, tx, [...signers, ...initSharingSigners]);
 
     // Pin the listing data to ensure it's kept around for a bit
     fetch('/api/pin/' + listingPubkey.toString(), {
@@ -97,7 +128,7 @@ export default function CreateListing() {
 
   const [fileUrl, updateFileUrl] = useState(``);
 
-  if (!publicKey) {
+  if (!wallet.publicKey) {
     return <Login />;
   }
 
@@ -162,6 +193,20 @@ export default function CreateListing() {
               placeholder="0.01"
               onChange={(e) => setPrice(parseFloat(e.target.value))}
               value={price}
+            />
+            <div className="bg-gray-50 px-2 text-gray-500">SOL</div>
+          </div>
+        </label>
+
+        <label className="flex flex-col mt-2 mb-4">
+          Affiliate Split
+          <div className="flex flex-row items-center rounded-sm bg-gray-50  border">
+            <input
+              type={'number'}
+              className=" px-2 py-2 rounded-sm flex flex-1"
+              placeholder="0.01"
+              onChange={(e) => setSplitPercent(parseFloat(e.target.value))}
+              value={splitPercent}
             />
             <div className="bg-gray-50 px-2 text-gray-500">SOL</div>
           </div>

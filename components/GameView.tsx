@@ -70,7 +70,7 @@ export default function GameView(props: {
           </svg>
         </button>
       </Link>
-      {listing.authority === wallet.publicKey && (
+      {listing.authority.toString() === wallet.publicKey?.toString() && (
         <Link href={`/edit/${props.publicKey}`}>
           <button className="bg-orange-300 mt-4 border border-orange-700 rounded-sm text-left w-full flex justify-between items-center px-3 py-2">
             <div>
