@@ -3,6 +3,17 @@ import { Transaction, Keypair, clusterApiUrl } from '@solana/web3.js';
 import { fetchStrangemoodProgram, MAINNET } from '@strangemood/strangemood';
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
+import initMiddleware from '../../../lib/initMiddleware';
+import Cors from 'cors';
+
+// Initialize the cors middleware
+const cors = initMiddleware(
+  // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
+  Cors({
+    // Only allow requests with GET, POST and OPTIONS
+    methods: ['GET', 'POST', 'OPTIONS'],
+  })
+);
 
 function dummyWallet() {
   return {
@@ -28,6 +39,9 @@ export default async function handler(
 ) {
   if (req.method !== 'POST')
     return res.status(400).send(`No ${req.method}. Only POST`);
+
+  // Run cors
+  await cors(req, res);
 
   const pubkey = req.query['pubkey'];
   const cluster = req.query['cluster'] || 'mainnet-beta';
