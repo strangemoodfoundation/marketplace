@@ -137,7 +137,14 @@ export const useSharingAccount = () => {
       ).tx
     );
 
-    splToken.Token.createAssociatedTokenAccountInstruction;
+    // tx.instructions.
+    // tx.instructions.forEach((ix) => {
+    //   console.log(ix.data.byteLength);
+    //   console.log({ keys: ix.keys, programId: ix.programId.toString() });
+    //   // console.log(ix.ac.byteLength);
+    // });
+    // // console.log({ size: tx..inserialize().byteLength });
+    // console.log({ size: tx.serialize().byteLength });
 
     return await sendAndSign(connection, wallet, tx, purchaseTx.signers);
   };

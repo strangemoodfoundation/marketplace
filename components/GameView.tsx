@@ -4,6 +4,8 @@ import { Listing } from '@strangemood/strangemood';
 import { useSolPrice } from '../lib/useSolPrice';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { ArrowIcon } from '../icons/ArrowIcon';
+import { EditIcon } from '../icons/EditIcon';
 
 export default function GameView(props: {
   publicKey: string;
@@ -31,6 +33,13 @@ export default function GameView(props: {
 
   return (
     <div className="mx-auto max-w-2xl border-gray-200 border mb-4 p-4">
+      {listing.authority.toString() === wallet.publicKey?.toString() && (
+        <Link href={`/edit/${props.publicKey}`}>
+          <button className="mt-4 border border-gray-700 rounded-sm text-left flex justify-right float-right items-center px-3 py-2">
+            <EditIcon className="h-5 w-5 text-gray-800" />
+          </button>
+        </Link>
+      )}
       <h1 className="text-lg font-bold capitalize">
         {data ? grabValue(data, 'title') : 'Title'}
       </h1>
@@ -56,51 +65,9 @@ export default function GameView(props: {
               </div>
             </div>
           </div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-green-800"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M14 5l7 7m0 0l-7 7m7-7H3"
-            />
-          </svg>
+          <ArrowIcon className="h-5 w-5 text-green-800" />
         </button>
       </Link>
-      {listing.authority.toString() === wallet.publicKey?.toString() && (
-        <Link href={`/edit/${props.publicKey}`}>
-          <button className="bg-orange-300 mt-4 border border-orange-700 rounded-sm text-left w-full flex justify-between items-center px-3 py-2">
-            <div>
-              <div>Edit Listing</div>
-              <div className="flex gap-1 items-center opacity-50 font-mono">
-                <div className="text-sm ">{priceInSol.toFixed(4)} SOL</div>|
-                <div className="text-sm">
-                  {(priceInSol * solPrice).toFixed(4)} USD
-                </div>
-              </div>
-            </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-orange-800"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </button>
-        </Link>
-      )}
     </div>
   );
 }
