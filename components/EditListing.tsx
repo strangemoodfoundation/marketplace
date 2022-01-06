@@ -54,23 +54,29 @@ export default function EditListing() {
   );
 
   async function onLoad() {
-    console.log(data ? grabValue(data, 'title') : 'nul;');
-    // These do not exist until after data is returned.
     setTitle(data ? grabValue(data, 'title') : '');
     setDescription(data ? grabValue(data, 'description') : '');
-
-    getSharingAccount(new PublicKey(router.query.publicKey as string))
-      .then((sharingAccount) => {
-        setNewSolDepositSplit(sharingAccount.split);
-      })
-      .catch((err) => {
-        console.log('no sharing acct exists');
-      });
   }
 
   useEffect(() => {
     onLoad();
   }, [data]);
+
+  useEffect(() => {
+    console.log('Getting sharing accounts!');
+    if (listing?.solDeposit)
+      getSharingAccount(
+        listing.solDeposit,
+        new PublicKey(router.query.publicKey as string)
+      )
+        .then((sharingAccount) => {
+          console.log({ sharingAccount });
+          setNewSolDepositSplit(sharingAccount.splitPercent);
+        })
+        .catch((err) => {
+          console.log('no sharing acct exists');
+        });
+  }, [listing?.solDeposit]);
 
   async function onSave() {
     if (!publicKey) return;
@@ -102,6 +108,15 @@ export default function EditListing() {
     const { cid } = await ipfs.add(JSON.stringify(metadata));
 
     fetch('https://ipfs.io/ipfs/' + cid);
+
+    fetch(
+      'https://demo.strangemood.org/api/pin/' +
+        (router.query.publicKey as string) +
+        '?cluster=testnet',
+      {
+        method: 'POST',
+      }
+    );
 
     ///
     const listingPublicKey = '';
@@ -152,30 +167,26 @@ export default function EditListing() {
         <h1 className="font-bold text-xl">Update Listing</h1>
         <p></p>
 
-        {title && (
-          <label className="flex flex-col mt-4">
-            Title
-            <input
-              type={'text'}
-              className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-              placeholder="Cool Title 123"
-              onChange={(e) => setTitle(e.target.value)}
-              value={title}
-            />
-          </label>
-        )}
+        <label className="flex flex-col mt-4">
+          Title
+          <input
+            type={'text'}
+            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
+            placeholder="Cool Title 123"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
+          />
+        </label>
 
-        {description && (
-          <label className="flex flex-col mt-4 mb-2">
-            Description
-            <textarea
-              className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-              placeholder="Some Cool Description"
-              onChange={(e) => setDescription(e.target.value)}
-              value={description}
-            />
-          </label>
-        )}
+        <label className="flex flex-col mt-4 mb-2">
+          Description
+          <textarea
+            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
+            placeholder="Some Cool Description"
+            onChange={(e) => setDescription(e.target.value)}
+            value={description}
+          />
+        </label>
 
         <label className="flex flex-col mt-2 mb-2">
           Image
@@ -195,29 +206,22 @@ export default function EditListing() {
           {fileUrl && <img src={fileUrl} width="600px" />}
         </label>
 
-        <label className="flex flex-col mt-4">
+        <label className="flex flex-col mt-2 mb-4">
           Affiliate Percentage
-          <input
-            type={'text'}
-            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-            placeholder="Public Key of Sharing Account"
-            onChange={(e) => setNewSolDepositSplit(parseFloat(e.target.value))}
-            value={newSolDepositSplit ?? 'no affiliate account exists'}
-            disabled={newSolDepositSplit === null}
-          />
+          <div className="flex flex-row items-center rounded-sm bg-gray-50  border">
+            <input
+              type={'number'}
+              className=" px-2 py-2 rounded-sm flex flex-1"
+              placeholder="0.01"
+              onChange={(e) =>
+                setNewSolDepositSplit(parseFloat(e.target.value ?? 0))
+              }
+              value={newSolDepositSplit ?? 0}
+              disabled={newSolDepositSplit === null}
+            />
+            <div className="bg-gray-50 px-2 text-gray-500">%</div>
+          </div>
         </label>
-
-        {/* <label className="flex flex-col mt-4">
-          Sharing Account (Sol Deposit Account). // TODO: need a button here to
-          create affiliate.
-          <input
-            type={'text'}
-            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-            placeholder="Public Key of Sharing Account"
-            onChange={(e) => setNewSolDeposit(e.target.value)}
-            value={newSolDeposit ?? ''}
-          />
-        </label> */}
 
         <br />
 

@@ -162,24 +162,18 @@ export const useSharingAccount = () => {
     return associatedTokenAddress;
   };
 
-  const getSharingAccountAddress = async (listingAddress: PublicKey) => {
-    if (!wallet.publicKey || !program) throw new Error('Not Connected');
+  const getSharingAccount = async (
+    solDeposit: PublicKey,
+    listingAddress: PublicKey
+  ) => {
+    const sharingAddr = await sharingPDA(solDeposit, listingAddress);
 
-    return await deriveSharingAccountAddress(
-      wallet.publicKey,
-      listingAddress,
-      CLUSTER.STRANGEMOOD_PROGRAM_ID
-    );
-  };
-
-  const getSharingAccount = async (listingAddress: PublicKey) => {
-    const addy: undefined | PublicKey = await getSharingAccountAddress(
-      listingAddress
-    );
-    if (!addy || !program)
+    if (!sharingAddr || !program)
       throw new Error('This Listing Address has no sharing account associated');
 
-    const account: any = await program?.account.sharingAccount.fetch(addy);
+    const account: any = await program?.account.sharingAccount.fetch(
+      sharingAddr[0]
+    );
     const { splitPercentAmount, splitPercentDecimals } = account;
 
     const splitPercent = unBorshifyFloat(
@@ -198,7 +192,6 @@ export const useSharingAccount = () => {
     updateSplitPercent,
     recoverAccountTokens,
     executePurchaseViaAffiliate,
-    getSharingAccountAddress,
     getSharingAccount,
     getAssociatedUserSolTokenAddress,
   };

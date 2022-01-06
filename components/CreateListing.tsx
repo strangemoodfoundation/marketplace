@@ -127,9 +127,14 @@ export default function CreateListing() {
     ]);
 
     // Pin the listing data to ensure it's kept around for a bit
-    fetch('https://demo.strangemood.org/api/pin/' + listingPubkey.toString(), {
-      method: 'POST',
-    });
+    fetch(
+      'https://demo.strangemood.org/api/pin/' +
+        listingPubkey.toString() +
+        '?cluster=testnet',
+      {
+        method: 'POST',
+      }
+    );
 
     router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
