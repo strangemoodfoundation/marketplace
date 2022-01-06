@@ -17,8 +17,8 @@ import {
   purchaseAssetByAffiliate,
   deriveSharingAccountAddress,
   getOrCreateAssociatedTokenAccount,
-  borshifyFloat,
   unBorshifyFloat,
+  sharingPDA,
 } from '@strangemood/sharing';
 import { useEffect, useState } from 'react';
 import { CLUSTER } from './constants';
@@ -92,7 +92,13 @@ export const useSharingAccount = () => {
     const asset = new web3.PublicKey(DEMO_ASSET_PUBKEY);
     console.log('Using asset keypair:', asset.toString());
 
-    const { tx } = await recover(connection, program, wallet.publicKey, asset);
+    const { tx } = await recover(
+      connection,
+      program,
+      wallet.publicKey,
+      wallet.publicKey,
+      asset
+    );
 
     return await sendAndSign(connection, wallet, tx);
   };
@@ -100,28 +106,32 @@ export const useSharingAccount = () => {
   const executePurchaseViaAffiliate = async (
     affiliate: web3.PublicKey,
     listing: PublicKey,
+    solDeposit: PublicKey,
     purchaseTx: { tx: Transaction | TransactionInstruction; signers?: Signer[] }
   ) => {
     const tx = new Transaction();
     if (!wallet.publicKey || !program) throw new Error('Not Connected');
 
-    const { address: assAddress, instruction: createTokenAcctTx } =
-      await getOrCreateAssociatedTokenAccount(
-        connection,
-        affiliate,
-        wallet.publicKey
-      );
+    const {
+      address: associatedAddressOfAffiliate,
+      instruction: createTokenAcctTx,
+    } = await getOrCreateAssociatedTokenAccount(
+      connection,
+      affiliate,
+      wallet.publicKey
+    );
 
     createTokenAcctTx && tx.add(createTokenAcctTx);
+
+    const sharingAddr = await sharingPDA(solDeposit, listing);
 
     tx.add(
       (
         await purchaseAssetByAffiliate(
-          connection,
           program,
           wallet.publicKey,
-          listing,
-          assAddress,
+          sharingAddr[0],
+          associatedAddressOfAffiliate,
           purchaseTx.tx
         )
       ).tx
@@ -156,7 +166,9 @@ export const useSharingAccount = () => {
   };
 
   const getSharingAccount = async (listingAddress: PublicKey) => {
-    const addy: undefined | PublicKey = await getSharingAccount(listingAddress);
+    const addy: undefined | PublicKey = await getSharingAccountAddress(
+      listingAddress
+    );
     if (!addy || !program)
       throw new Error('This Listing Address has no sharing account associated');
 

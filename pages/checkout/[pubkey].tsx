@@ -118,18 +118,14 @@ export default function Checkout() {
     await executePurchaseViaAffiliate(
       affiliateForRevSplit,
       new PublicKey(router.query.pubkey as string),
+      listing.solDeposit,
       { tx, signers }
     );
-
-    // const sig = await sendTransaction(tx, provider.connection, {
-    //   signers,
-    // });
-    // await provider.connection.confirmTransaction(sig);
 
     setIsLoading(false);
   }
 
-  if (!data || !listing) {
+  if (!listing) {
     // loading
     return <div></div>;
   }
@@ -194,7 +190,7 @@ export default function Checkout() {
         )}
 
         <h2 className="mb-1 text-xl font-bold capitalize">
-          {grabValue(data, 'title')}
+          {data ? grabValue(data, 'title') : 'Title'}
         </h2>
         <p className="opacity-50 mb-4 ">{router.query.pubkey}</p>
 
