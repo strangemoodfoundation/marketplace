@@ -48,8 +48,6 @@ export default async function handler(
   // Run cors
   await cors(req, res);
 
-  // res.setHeader('Access-Control-Allow-Origin', '*');
-
   const pubkey = req.query['pubkey'];
   const cluster = req.query['cluster'] || 'mainnet-beta';
 
@@ -60,13 +58,7 @@ export default async function handler(
     cluster === 'mainnet-beta'
       ? MAINNET.STRANGEMOOD_PROGRAM_ID
       : TESTNET.STRANGEMOOD_PROGRAM_ID;
-  const strangemood = await fetchStrangemoodProgram(provider);
-
-  console.log('fetched strangemood program for:', {
-    programId,
-    cluster,
-    url: clusterApiUrl(cluster as Cluster),
-  });
+  const strangemood = await fetchStrangemoodProgram(provider, programId);
 
   const listing = await strangemood.account.listing.fetch(pubkey as string);
   console.log('fetched listing', { ...listing });
@@ -97,9 +89,8 @@ export default async function handler(
     }),
   });
   if (result.status !== 200) {
-    return res.status(502).send('post request to pinata failed');
-    // console.error(await result.text());
-    // return res.status(500).send('something went wrong');
+    console.error(await result.text());
+    return res.status(500).send('something went wrong');
   }
 
   res.status(200).send('Ok');
