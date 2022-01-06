@@ -51,6 +51,8 @@ export default async function handler(
   // Run cors
   await cors(req, res);
 
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   const pubkey = req.query['pubkey'];
   const cluster = req.query['cluster'] || 'mainnet-beta';
 
