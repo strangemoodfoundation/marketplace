@@ -1,5 +1,5 @@
 import { Provider, web3 } from '@project-serum/anchor';
-import { Transaction, Keypair, clusterApiUrl } from '@solana/web3.js';
+import { Transaction, Keypair, clusterApiUrl, Cluster } from '@solana/web3.js';
 import {
   fetchStrangemoodProgram,
   MAINNET,
@@ -16,14 +16,7 @@ const cors = initMiddleware(
   Cors({
     // Only allow requests with GET, POST and OPTIONS
     methods: ['GET', 'POST', 'OPTIONS'],
-    origin: function (origin, callback) {
-      // Allow all origins
-      // if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-      // } else {
-      //   callback(new Error('Not allowed by CORS'));
-      // }
-    },
+    origin: '*',
   })
 );
 
@@ -55,7 +48,7 @@ export default async function handler(
   // Run cors
   await cors(req, res);
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // res.setHeader('Access-Control-Allow-Origin', '*');
 
   const pubkey = req.query['pubkey'];
   const cluster = req.query['cluster'] || 'mainnet-beta';
@@ -63,14 +56,20 @@ export default async function handler(
   const conn = new web3.Connection(clusterApiUrl(cluster as any));
   const provider = new Provider(conn, dummyWallet(), {});
 
-  const strangemood = await fetchStrangemoodProgram(
-    provider,
+  const programId =
     cluster === 'mainnet-beta'
       ? MAINNET.STRANGEMOOD_PROGRAM_ID
-      : TESTNET.STRANGEMOOD_PROGRAM_ID
-  );
+      : TESTNET.STRANGEMOOD_PROGRAM_ID;
+  const strangemood = await fetchStrangemoodProgram(provider);
+
+  console.log('fetched strangemood program for:', {
+    programId,
+    cluster,
+    url: clusterApiUrl(cluster as Cluster),
+  });
 
   const listing = await strangemood.account.listing.fetch(pubkey as string);
+  console.log('fetched listing', { ...listing });
   const uri = (listing.uri as string) || '';
   if (!(listing.uri as string).startsWith('ipfs://'))
     return res.status(200).send('Not an IPFS url, ignoring');
@@ -98,8 +97,9 @@ export default async function handler(
     }),
   });
   if (result.status !== 200) {
-    console.error(await result.text());
-    return res.status(500).send('something went wrong');
+    return res.status(502).send('post request to pinata failed');
+    // console.error(await result.text());
+    // return res.status(500).send('something went wrong');
   }
 
   res.status(200).send('Ok');
