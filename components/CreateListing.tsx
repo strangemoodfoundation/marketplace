@@ -38,8 +38,10 @@ export default function CreateListing() {
 
   const wallet = useWallet();
   const provider = useAnchorProvider();
-  const { initializeTx: initializeSharingAccount, getSharingAccountAddress } =
-    useSharingAccount();
+  const {
+    initializeTx: initializeSharingAccount,
+    getAssociatedUserSolTokenAddress,
+  } = useSharingAccount();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -95,27 +97,34 @@ export default function CreateListing() {
       'ipfs://' + cid,
       CLUSTER
     );
+
     tx.add(createListingTx);
 
     // TX 2. Create Sharing Account for Affiliate Revenue
     const { tx: initSharingTx, signers: initSharingSigners } =
-      await initializeSharingAccount(splitPercent);
+      await initializeSharingAccount(listingPubkey, splitPercent);
     tx.add(initSharingTx);
 
     const { associatedSolAddress, associatedVoteAddress } =
       await getStrangemoodAssociatedTokenAddress(wallet.publicKey);
 
     // TX 3. Update Listing's Deposit Account to use the Sharing Account
+    const newAssociatedSolTokenAddress =
+      await getAssociatedUserSolTokenAddress();
+
     const { tx: setTx } = await setListingDeposits(
       strangemood as any,
       wallet.publicKey,
       listingPubkey,
       associatedVoteAddress,
-      await getSharingAccountAddress(listingPubkey)
+      newAssociatedSolTokenAddress
     );
     tx.add(setTx);
 
-    sendAndSign(connection, wallet, tx, [...signers, ...initSharingSigners]);
+    const result = await sendAndSign(connection, wallet, tx, [
+      ...signers,
+      ...initSharingSigners,
+    ]);
 
     // Pin the listing data to ensure it's kept around for a bit
     fetch('/api/pin/' + listingPubkey.toString(), {
@@ -208,7 +217,7 @@ export default function CreateListing() {
               onChange={(e) => setSplitPercent(parseFloat(e.target.value))}
               value={splitPercent}
             />
-            <div className="bg-gray-50 px-2 text-gray-500">SOL</div>
+            <div className="bg-gray-50 px-2 text-gray-500">%</div>
           </div>
         </label>
 

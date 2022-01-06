@@ -1,4 +1,4 @@
-import { Program, web3 } from '@project-serum/anchor';
+import { AccountClient, Program, web3 } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   Keypair,
@@ -16,10 +16,15 @@ import {
   Sharing,
   purchaseAssetByAffiliate,
   deriveSharingAccountAddress,
+  getOrCreateAssociatedTokenAccount,
+  borshifyFloat,
+  unBorshifyFloat,
 } from '@strangemood/sharing';
 import { useEffect, useState } from 'react';
 import { CLUSTER } from './constants';
 import { sendAndSign } from './util';
+
+import * as splToken from '@solana/spl-token';
 
 const DEMO_ASSET_PUBKEY = '6Y7vqCM3c7xSNcfL6d5dpboudvVRpbzigpUkUBuavXSt';
 
@@ -42,18 +47,17 @@ export const useSharingAccount = () => {
     fetchProgram();
   }, []);
 
-  const initializeTx = async (splitPercent: number) => {
+  const initializeTx = async (
+    assetKeypair: PublicKey,
+    splitPercent: number
+  ) => {
     if (!wallet.publicKey || !program) throw new Error('Not Connected');
-
-    // TODO: pass in real asset lolol.
-    const asset = Keypair.generate().publicKey;
-    console.log('Created a new asset keypair:', asset.toString());
 
     const { tx, signers } = await initSharingAccount(
       connection,
       program,
       wallet.publicKey,
-      asset,
+      assetKeypair,
       {
         splitPercent,
       }
@@ -93,23 +97,52 @@ export const useSharingAccount = () => {
     return await sendAndSign(connection, wallet, tx);
   };
 
-  const purchaseViaAffiliate = async (
+  const executePurchaseViaAffiliate = async (
     affiliate: web3.PublicKey,
     listing: PublicKey,
     purchaseTx: { tx: Transaction | TransactionInstruction; signers?: Signer[] }
   ) => {
+    const tx = new Transaction();
     if (!wallet.publicKey || !program) throw new Error('Not Connected');
 
-    const { tx } = await purchaseAssetByAffiliate(
-      connection,
-      program,
-      wallet.publicKey,
-      listing,
-      affiliate,
-      purchaseTx.tx
+    const { address: assAddress, instruction: createTokenAcctTx } =
+      await getOrCreateAssociatedTokenAccount(
+        connection,
+        affiliate,
+        wallet.publicKey
+      );
+
+    createTokenAcctTx && tx.add(createTokenAcctTx);
+
+    tx.add(
+      (
+        await purchaseAssetByAffiliate(
+          connection,
+          program,
+          wallet.publicKey,
+          listing,
+          assAddress,
+          purchaseTx.tx
+        )
+      ).tx
     );
 
+    splToken.Token.createAssociatedTokenAccountInstruction;
+
     return await sendAndSign(connection, wallet, tx, purchaseTx.signers);
+  };
+
+  const getAssociatedUserSolTokenAddress = async () => {
+    if (!wallet.publicKey || !program) throw new Error('Not Connected');
+    const associatedTokenAddress =
+      await splToken.Token.getAssociatedTokenAddress(
+        splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+        splToken.TOKEN_PROGRAM_ID,
+        splToken.NATIVE_MINT,
+        wallet.publicKey
+      );
+
+    return associatedTokenAddress;
   };
 
   const getSharingAccountAddress = async (listingAddress: PublicKey) => {
@@ -122,11 +155,32 @@ export const useSharingAccount = () => {
     );
   };
 
+  const getSharingAccount = async (listingAddress: PublicKey) => {
+    const addy: undefined | PublicKey = await getSharingAccount(listingAddress);
+    if (!addy || !program)
+      throw new Error('This Listing Address has no sharing account associated');
+
+    const account: any = await program?.account.sharingAccount.fetch(addy);
+    const { splitPercentAmount, splitPercentDecimals } = account;
+
+    const splitPercent = unBorshifyFloat(
+      splitPercentAmount,
+      splitPercentDecimals
+    );
+
+    return {
+      splitPercent,
+      ...account,
+    };
+  };
+
   return {
     initializeTx,
     updateSplitPercent,
     recoverAccountTokens,
-    purchaseViaAffiliate,
+    executePurchaseViaAffiliate,
     getSharingAccountAddress,
+    getSharingAccount,
+    getAssociatedUserSolTokenAddress,
   };
 };

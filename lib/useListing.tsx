@@ -75,6 +75,10 @@ export function useListings(): Array<{
 }
 
 export async function getStrangemoodAssociatedTokenAddress(user: PublicKey) {
+  console.log(
+    'fn: getStrangemoodAssociatedTokenAddress for user key:',
+    user.toString()
+  );
   // Find or create an associated vote token account
   const associatedVoteAddress = await splToken.Token.getAssociatedTokenAddress(
     splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -83,12 +87,16 @@ export async function getStrangemoodAssociatedTokenAddress(user: PublicKey) {
     user
   );
 
+  console.log('associatedVoteAddress: ', associatedVoteAddress.toString());
+
   const associatedSolAddress = await splToken.Token.getAssociatedTokenAddress(
     splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
     splToken.TOKEN_PROGRAM_ID,
     splToken.NATIVE_MINT,
     user
   );
+
+  console.log('associatedSolAddress: ', associatedSolAddress.toString());
 
   return { associatedVoteAddress, associatedSolAddress };
 }

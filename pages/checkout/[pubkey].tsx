@@ -1,5 +1,5 @@
 import { useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   fetchStrangemoodProgram,
   Listing,
@@ -16,6 +16,8 @@ import { useListing, useListingMetadata } from '../../lib/useListing';
 import { useSolPrice } from '../../lib/useSolPrice';
 import * as splToken from '@solana/spl-token';
 import { CLUSTER } from '../../lib/constants';
+import { useSharingAccount } from '../../lib/useSharingAccount';
+import { web3 } from '@project-serum/anchor';
 
 function ALink(props: { href: string; children: any }) {
   return (
@@ -85,6 +87,7 @@ export default function Checkout() {
   const { data } = useListingMetadata(listing);
   const { publicKey, sendTransaction } = useWallet();
   const solPrice = useSolPrice();
+  const { executePurchaseViaAffiliate } = useSharingAccount();
   const rampLink = useRampLink(listing as any);
   const [isLoading, setIsLoading] = useState(false);
   const listingTokenBalance = useTokenBalance(listing?.mint);
@@ -94,6 +97,12 @@ export default function Checkout() {
 
     setIsLoading(true);
     const program = await fetchStrangemoodProgram(provider);
+
+    // Laila Wallet
+    // TODO! Pass something in here
+    const affiliateForRevSplit = new web3.PublicKey(
+      'D7z19SArCZbVWkM1LrBgFCWSuFcxCd1M3jB6uwc4DWnc'
+    );
 
     const { tx, signers } = await purchaseListing(
       program,
@@ -106,10 +115,17 @@ export default function Checkout() {
       CLUSTER
     );
 
-    const sig = await sendTransaction(tx, provider.connection, {
-      signers,
-    });
-    await provider.connection.confirmTransaction(sig);
+    await executePurchaseViaAffiliate(
+      affiliateForRevSplit,
+      new PublicKey(router.query.pubkey as string),
+      { tx, signers }
+    );
+
+    // const sig = await sendTransaction(tx, provider.connection, {
+    //   signers,
+    // });
+    // await provider.connection.confirmTransaction(sig);
+
     setIsLoading(false);
   }
 

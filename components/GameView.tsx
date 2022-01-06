@@ -21,18 +21,18 @@ export default function GameView(props: {
       )}`
   );
 
-  if (!listing || !listing.uri || !data) return null;
+  // if (!listing || !listing.uri || !data) return null;
 
-  if (!data) {
-    return <div className="mx-auto max-w-2xl py-4 animate-pulse h-24"></div>;
-  }
+  // if (!data) {
+  //   return <div className="mx-auto max-w-2xl py-4 animate-pulse h-24"></div>;
+  // }
 
   const priceInSol = listing.price.toNumber() / 1000000000;
 
   return (
     <div className="mx-auto max-w-2xl border-gray-200 border mb-4 p-4">
       <h1 className="text-lg font-bold capitalize">
-        {grabValue(data, 'title')}
+        {data ? grabValue(data, 'title') : 'Title'}
       </h1>
       <Link href={`https://solscan.io/account/${props.publicKey}`}>
         <a
@@ -42,7 +42,9 @@ export default function GameView(props: {
           {props.publicKey}
         </a>
       </Link>
-      <p className="">{grabValue(data, 'description').trim()}</p>
+      <p className="">
+        {data ? grabValue(data, 'description').trim() : 'Description'}
+      </p>
       <Link href={`/checkout/${props.publicKey}`}>
         <button className="bg-green-300 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center px-3 py-2">
           <div>

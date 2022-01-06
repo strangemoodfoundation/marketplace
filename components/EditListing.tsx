@@ -1,4 +1,3 @@
-import { BN } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   fetchStrangemoodProgram,
@@ -12,11 +11,11 @@ import { grabValue, OpenMetaGraph } from '../lib/omg';
 import { useAnchorProvider } from '../lib/useAnchor';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
-import { useSolPrice } from '../lib/useSolPrice';
 import { CLUSTER } from '../lib/constants';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { useListing } from '../lib/useListing';
 import { useSWR } from '../lib/useSWR';
+import { useSharingAccount } from '../lib/useSharingAccount';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
@@ -34,6 +33,7 @@ export default function EditListing() {
   const router = useRouter();
 
   const listing = useListing(provider, router.query.publicKey as string);
+  const { getSharingAccount } = useSharingAccount();
 
   const { data } = useSWR<OpenMetaGraph>(
     listing &&
@@ -49,17 +49,27 @@ export default function EditListing() {
   const [isLoading, setIsLoading] = useState(false);
   const [newVoteDeposit, setNewVoteDeposit] = useState<string | null>(null);
   const [newSolDeposit, setNewSolDeposit] = useState<string | null>(null);
+  const [newSolDepositSplit, setNewSolDepositSplit] = useState<number | null>(
+    null
+  );
 
-  async function refresh() {
+  async function onLoad() {
     console.log(data ? grabValue(data, 'title') : 'nul;');
     // These do not exist until after data is returned.
     setTitle(data ? grabValue(data, 'title') : '');
     setDescription(data ? grabValue(data, 'description') : '');
+
+    getSharingAccount(new PublicKey(router.query.publicKey as string))
+      .then((sharingAccount) => {
+        setNewSolDepositSplit(sharingAccount.split);
+      })
+      .catch((err) => {
+        console.log('no sharing acct exists');
+      });
   }
 
   useEffect(() => {
-    refresh();
-    // wild... happens if we click it but not without ?
+    onLoad();
   }, [data]);
 
   async function onSave() {
@@ -155,18 +165,6 @@ export default function EditListing() {
           </label>
         )}
 
-        <label className="flex flex-col mt-4">
-          Sharing Account (Sol Deposit Account). // TODO: need a button here to
-          create affiliate.
-          <input
-            type={'text'}
-            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-            placeholder="Public Key of Sharing Account"
-            onChange={(e) => setNewSolDeposit(e.target.value)}
-            value={newSolDeposit ?? ''}
-          />
-        </label>
-
         {description && (
           <label className="flex flex-col mt-4 mb-2">
             Description
@@ -197,19 +195,38 @@ export default function EditListing() {
           {fileUrl && <img src={fileUrl} width="600px" />}
         </label>
 
+        <label className="flex flex-col mt-4">
+          Affiliate Percentage
+          <input
+            type={'text'}
+            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
+            placeholder="Public Key of Sharing Account"
+            onChange={(e) => setNewSolDepositSplit(parseFloat(e.target.value))}
+            value={newSolDepositSplit ?? 'no affiliate account exists'}
+            disabled={newSolDepositSplit === null}
+          />
+        </label>
+
+        {/* <label className="flex flex-col mt-4">
+          Sharing Account (Sol Deposit Account). // TODO: need a button here to
+          create affiliate.
+          <input
+            type={'text'}
+            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
+            placeholder="Public Key of Sharing Account"
+            onChange={(e) => setNewSolDeposit(e.target.value)}
+            value={newSolDeposit ?? ''}
+          />
+        </label> */}
+
+        <br />
+
         <button
           disabled={!title || !description}
           onClick={onSave}
           className="flex w-32 border-blue-400 text-blue-700 border rounded-sm items-center justify-center hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Save
-        </button>
-
-        <button
-          onClick={refresh}
-          className="flex w-32 border-blue-400 text-blue-700 border rounded-sm items-center justify-center hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          refresh
         </button>
       </div>
     </div>
