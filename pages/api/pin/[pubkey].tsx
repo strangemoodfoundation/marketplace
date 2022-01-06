@@ -1,6 +1,10 @@
 import { Provider, web3 } from '@project-serum/anchor';
 import { Transaction, Keypair, clusterApiUrl } from '@solana/web3.js';
-import { fetchStrangemoodProgram, MAINNET } from '@strangemood/strangemood';
+import {
+  fetchStrangemoodProgram,
+  MAINNET,
+  TESTNET,
+} from '@strangemood/strangemood';
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 import initMiddleware from '../../../lib/initMiddleware';
@@ -61,7 +65,9 @@ export default async function handler(
 
   const strangemood = await fetchStrangemoodProgram(
     provider,
-    MAINNET.STRANGEMOOD_PROGRAM_ID
+    cluster === 'mainnet-beta'
+      ? MAINNET.STRANGEMOOD_PROGRAM_ID
+      : TESTNET.STRANGEMOOD_PROGRAM_ID
   );
 
   const listing = await strangemood.account.listing.fetch(pubkey as string);
