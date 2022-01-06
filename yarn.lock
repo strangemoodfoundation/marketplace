@@ -680,10 +680,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strangemood/sharing@^0.0.0-10":
-  version "0.0.0-10"
-  resolved "https://registry.yarnpkg.com/@strangemood/sharing/-/sharing-0.0.0-10.tgz#91a95a131c0eebbba9d6c227c6277923f6fa3dad"
-  integrity sha512-SCndzzDfKJ0y9gtZ2tEPuFug5RPBkO9n5XyFGldsCrD48/K0t5WiPuGOsfFJx7f4FxOha5ezbosIC3VDC0/0gA==
+"@strangemood/sharing@^0.0.0-11":
+  version "0.0.0-11"
+  resolved "https://registry.yarnpkg.com/@strangemood/sharing/-/sharing-0.0.0-11.tgz#dae09353c1d94371d7bb1e46556add47a147d29a"
+  integrity sha512-HRs71lT9WGMJ1WBpP5zyx63dbKSw464HF/xSFOFqQ6/KOCjS7TcUeD3qZwluFYaoVo1+8VEaI1YGyNW9SbeqsA==
   dependencies:
     "@project-serum/anchor" "^0.19.1-beta.1"
     "@solana/spl-token" "^0.1.8"
