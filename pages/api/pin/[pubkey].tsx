@@ -48,50 +48,61 @@ export default async function handler(
   // Run cors
   await cors(req, res);
 
-  const pubkey = req.query['pubkey'];
-  const cluster = req.query['cluster'] || 'mainnet-beta';
+  try {
+    const pubkey = req.query['pubkey'];
+    const cluster = req.query['cluster'] || 'mainnet-beta';
 
-  const conn = new web3.Connection(clusterApiUrl(cluster as any));
-  const provider = new Provider(conn, dummyWallet(), {});
+    const conn = new web3.Connection(clusterApiUrl(cluster as any));
+    const provider = new Provider(conn, dummyWallet(), {});
 
-  const programId =
-    cluster === 'mainnet-beta'
-      ? MAINNET.STRANGEMOOD_PROGRAM_ID
-      : TESTNET.STRANGEMOOD_PROGRAM_ID;
-  const strangemood = await fetchStrangemoodProgram(provider, programId);
+    const programId =
+      cluster === 'mainnet-beta'
+        ? MAINNET.STRANGEMOOD_PROGRAM_ID
+        : TESTNET.STRANGEMOOD_PROGRAM_ID;
+    const strangemood = await fetchStrangemoodProgram(provider, programId);
 
-  const listing = await strangemood.account.listing.fetch(pubkey as string);
-  console.log('fetched listing', { ...listing });
-  const uri = (listing.uri as string) || '';
-  if (!(listing.uri as string).startsWith('ipfs://'))
-    return res.status(200).send('Not an IPFS url, ignoring');
+    console.log('Fetching for', {
+      listingPubkey: pubkey as string,
+      cluster,
+      clusterUrl: clusterApiUrl(cluster as Cluster),
+      programId: programId.toString(),
+    });
 
-  const cid = uri.replace('ipfs://', '');
+    const listing = await strangemood.account.listing.fetch(pubkey as string);
+    console.log('fetched listing', { ...listing });
+    const uri = (listing.uri as string) || '';
+    if (!(listing.uri as string).startsWith('ipfs://'))
+      return res.status(200).send('Not an IPFS url, ignoring');
 
-  if (
-    !process.env.IPFS_PINNING_SERVICE_TOKEN &&
-    process.env.NODE_ENV === 'production'
-  ) {
-    throw new Error(
-      'Unexpectedly did not find IPFS_PINNING_SERVICE_TOKEN in production'
-    );
+    const cid = uri.replace('ipfs://', '');
+
+    if (
+      !process.env.IPFS_PINNING_SERVICE_TOKEN &&
+      process.env.NODE_ENV === 'production'
+    ) {
+      throw new Error(
+        'Unexpectedly did not find IPFS_PINNING_SERVICE_TOKEN in production'
+      );
+    }
+
+    const result = await fetch('https://api.pinata.cloud/psa/pins', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: ('Bearer ' +
+          process.env.IPFS_PINNING_SERVICE_TOKEN) as string,
+      },
+      body: JSON.stringify({
+        cid,
+      }),
+    });
+    if (result.status !== 200) {
+      console.error(await result.text());
+      return res.status(500).send('something went wrong');
+    }
+
+    res.status(200).send('Ok');
+  } catch (err) {
+    return res.status(500).send('Something went wrong');
   }
-
-  const result = await fetch('https://api.pinata.cloud/psa/pins', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: ('Bearer ' +
-        process.env.IPFS_PINNING_SERVICE_TOKEN) as string,
-    },
-    body: JSON.stringify({
-      cid,
-    }),
-  });
-  if (result.status !== 200) {
-    console.error(await result.text());
-    return res.status(500).send('something went wrong');
-  }
-
-  res.status(200).send('Ok');
 }
