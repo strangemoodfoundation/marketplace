@@ -29,7 +29,7 @@ export function useListingMetadata(listing: any) {
   return useSWR<OpenMetaGraph>(
     listing &&
       listing.uri &&
-      `https://ipfs.io/ipfs/${((listing?.uri as string) || '').replace(
+      `/api/ipfs/${((listing?.uri as string) || '').replace(
         'ipfs://',
         ''
       )}`

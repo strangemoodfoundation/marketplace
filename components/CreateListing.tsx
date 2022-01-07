@@ -80,7 +80,7 @@ export default function CreateListing() {
 
     // Trick the gateway into caching our metadata early
     // which makes the next page load faster
-    fetch('https://ipfs.io/ipfs/' + cid);
+    fetch('/api/ipfs/' + cid.toString());
 
     const tx = new web3.Transaction();
 
@@ -94,7 +94,7 @@ export default function CreateListing() {
       connection,
       wallet.publicKey,
       new BN(price * LAMPORTS_PER_SOL),
-      'ipfs://' + cid,
+      'ipfs://' + cid.toString(),
       CLUSTER
     );
 

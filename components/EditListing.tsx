@@ -3,6 +3,7 @@ import {
   fetchStrangemoodProgram,
   initListing,
   setListingDeposits,
+  setListingUri,
 } from '@strangemood/strangemood';
 import { create } from 'ipfs-http-client';
 import { useEffect, useState } from 'react';
@@ -38,10 +39,7 @@ export default function EditListing() {
   const { data } = useSWR<OpenMetaGraph>(
     listing &&
       listing.uri &&
-      `https://ipfs.io/ipfs/${((listing?.uri as string) || '').replace(
-        'ipfs://',
-        ''
-      )}`
+      `/api/ipfs/${((listing?.uri as string) || '').replace('ipfs://', '')}`
   );
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -59,11 +57,13 @@ export default function EditListing() {
   }
 
   useEffect(() => {
-    onLoad();
-  }, [data]);
+    if (data) {
+      onLoad();
+    } else {
+    }
+  }, [JSON.stringify(data), listing]);
 
   useEffect(() => {
-    console.log('Getting sharing accounts!');
     if (listing?.solDeposit)
       getSharingAccount(
         listing.solDeposit,
@@ -107,21 +107,20 @@ export default function EditListing() {
 
     const { cid } = await ipfs.add(JSON.stringify(metadata));
 
-    fetch('https://ipfs.io/ipfs/' + cid);
+    fetch('/api/ipfs/' + cid.toString());
 
-    fetch(
-      'https://demo.strangemood.org/api/pin/' +
-        (router.query.publicKey as string) +
-        '?cluster=testnet',
-      {
-        method: 'POST',
-      }
-    );
-
-    ///
-    const listingPublicKey = '';
+    const listingPublicKey = new PublicKey(router.query.publicKey as string);
 
     let tx = new Transaction();
+
+    const { tx: updateUriTx } = await setListingUri(
+      strangemood as any,
+      publicKey,
+      listingPublicKey,
+      'ipfs://' + cid.toString()
+    );
+
+    tx.add(updateUriTx);
 
     // send tx for things that have been modified, starting with deposit accts
     if (newVoteDeposit || newSolDeposit) {
@@ -135,10 +134,11 @@ export default function EditListing() {
 
       if (!vtAcct || !solAcct)
         throw new Error('Vote and Sol Deposit Accounts Needed');
+
       const { tx: listingTx } = await setListingDeposits(
         strangemood as any,
         publicKey,
-        new PublicKey(listingPublicKey),
+        listingPublicKey,
         vtAcct,
         solAcct
       );
@@ -147,7 +147,17 @@ export default function EditListing() {
     }
 
     let sig = await sendTransaction(tx, connection);
-    await provider.connection.confirmTransaction(sig);
+    const conf = await provider.connection.confirmTransaction(sig);
+
+    // Pin the resource
+    fetch(
+      'https://demo.strangemood.org/api/pin/' +
+        (router.query.publicKey as string) +
+        '?cluster=testnet',
+      {
+        method: 'POST',
+      }
+    );
   }
 
   const [fileUrl, updateFileUrl] = useState(``);
