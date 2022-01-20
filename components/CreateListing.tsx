@@ -64,11 +64,17 @@ export default function CreateListing() {
       ],
     };
 
-    const { cid } = await ipfs.add(JSON.stringify(metadata));
-
-    // Trick the gateway into caching our metadata early
-    // which makes the next page load faster
-    fetch('https://ipfs.io/ipfs/' + cid);
+    const response = await fetch("/api/ipfs", {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(metadata)
+    });
+    const json = await response.json();
+    const cid = json["cid"];
 
     const {
       tx,
@@ -83,11 +89,6 @@ export default function CreateListing() {
     );
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
-
-    // Pin the listing data to ensure it's kept around for a bit
-    fetch('/api/pin/' + listingPubkey.toString(), {
-      method: 'POST',
-    });
 
     router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
