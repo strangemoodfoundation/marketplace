@@ -38,7 +38,7 @@ export default function EditListing() {
     setIsLoading(true);
     const strangemood = await fetchStrangemoodProgram(
       provider,
-      MAINNET.STRANGEMOOD_PROGRAM_ID
+      MAINNET.strangemood_program_id
     );
 
     const metadata: OpenMetaGraph = {

@@ -1,5 +1,5 @@
 import { Program } from '@project-serum/anchor';
-import { AccountInfo, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
   fetchStrangemoodProgram,
   Listing,
@@ -43,7 +43,7 @@ export function useListing(provider: any, pubkey: string): Listing {
       if (!provider) return;
       const strangemood = await fetchStrangemoodProgram(
         provider,
-        MAINNET.STRANGEMOOD_PROGRAM_ID
+        MAINNET.strangemood_program_id
       );
 
       const listing = await strangemood.account.listing.fetch(pubkey as string);
@@ -60,15 +60,15 @@ export function useListings(): Array<{
   account: Listing;
 }> {
   const [state, setState] = useState<any>([]);
-  const program = useStrangemoodProgram();
+  // const program = useStrangemoodProgram();
 
-  useEffect(() => {
-    if (!program) return;
+  // useEffect(() => {
+  //   if (!program) return;
 
-    program.account.listing.all().then((listings) => {
-      setState(listings);
-    });
-  }, [!!program]);
+  //   // program.account.listing.all().then((listings) => {
+  //   //   setState(listings);
+  //   // });
+  // }, [!!program]);
 
   return state;
 }
