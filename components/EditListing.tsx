@@ -5,6 +5,7 @@ import {
   MAINNET,
   initListing,
   Listing,
+  setListingUri,
 } from '@strangemood/strangemood';
 import { create } from 'ipfs-http-client';
 import { useState } from 'react';
@@ -14,14 +15,8 @@ import { useAnchorProvider } from '../lib/useAnchor';
 import { useListing, useListingMetadata } from '../lib/useListing';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
-import { useSolPrice } from '../lib/useSolPrice';
 import { PublicKey } from '@solana/web3.js';
-import { publicKey } from '@project-serum/anchor/dist/cjs/utils';
-
-function useIpfs() {
-  const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
-  return client;
-}
+import web3Upload from '../lib/web3Util';
 
 function useOwnsListing(listing: Listing, pubkey: PublicKey | null) {
   if (!pubkey || !listing)
@@ -29,10 +24,7 @@ function useOwnsListing(listing: Listing, pubkey: PublicKey | null) {
   return listing.authority.toString() === pubkey.toString();
 }
 
-const LAMPORTS_PER_SOL = 1000000000;
-
 export default function EditListing() {
-  const ipfs = useIpfs();
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected, connecting } = useWallet();
   const provider = useAnchorProvider();
@@ -43,11 +35,12 @@ export default function EditListing() {
   const ownsListing = useOwnsListing(listing, publicKey);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [fileUrl, updateFileUrl] = useState(``);
+  const [fileCID, updateFileCID] = useState(``);
 
   async function onSave() {
+    if (!data) return;
     if (!publicKey) return;
-    if (!title || !description) return;
+    if (!title && !description && !fileCID) return;
 
     setIsLoading(true);
     const strangemood = await fetchStrangemoodProgram(
@@ -62,19 +55,40 @@ export default function EditListing() {
         {
           key: 'title',
           type: 'plain/text',
-          value: title,
+          value: !title ? grabValue(data, "title") : title,
         },
         {
           key: 'description',
           type: 'plain/text',
-          value: description,
+          value: !description ? grabValue(data, "description") : description,
+        },
+        {
+          key: 'image',
+          type: 'image',
+          value: !fileCID ? grabValue(data, "image") : 'ipfs://' + fileCID,
         },
       ],
     };
 
-    const { cid } = await ipfs.add(JSON.stringify(metadata));
+    const metadataBlob = new Blob([JSON.stringify(metadata)]);
+    const cid = await web3Upload(metadataBlob);
+    console.log(cid);
 
-    fetch('https://ipfs.io/ipfs/' + cid);
+    const listingPubkey = new PublicKey(router.query.pubkey as string)
+
+    const {
+      tx
+    } = await setListingUri(
+      strangemood as any,
+      publicKey,
+      listingPubkey,
+      'ipfs://' + cid
+    );
+    let sig = await sendTransaction(tx, connection);
+    await provider.connection.confirmTransaction(sig);
+
+    router.push(`/checkout/${listingPubkey.toString()}`);
+    setIsLoading(false);
   }
 
 
@@ -126,20 +140,24 @@ export default function EditListing() {
             type="file"
             onChange={async (e: any) => {
               const file = e.target.files[0];
+              if (!file) {
+                updateFileCID(``);
+                return
+              }
               try {
-                const added = await ipfs.add(file);
-                const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-                updateFileUrl(url);
+                const cid = await web3Upload(file);
+                console.log(cid);
+                updateFileCID(cid);
               } catch (error) {
                 console.log('Error uploading file: ', error);
               }
             }}
           />
-          {fileUrl && <img src={fileUrl} width="600px" />}
+          {fileCID && <img className='mt-1' src={`/api/ipfs?cid=${fileCID}`} width="600px" />}
         </label>
 
         <button
-          disabled={!title || !description}
+          disabled={!title && !description && !fileCID}
           onClick={onSave}
           className="flex w-32 border-blue-400 text-blue-700 border rounded-sm items-center justify-center hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >

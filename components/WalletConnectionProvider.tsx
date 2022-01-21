@@ -30,7 +30,7 @@ export const WalletConnectionProvider: FC<{ children: ReactNode }> = ({
   // You can also provide a custom RPC endpoint
   const endpoint =
     flag == 'mainnet-beta'
-      ? 'https://api.mainnet-beta.solana.com/'
+      ? 'https://ssc-dao.genesysgo.net/'
       : "'https://rpc-testnet.rebasefoundation.org/'";
 
   // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking --
