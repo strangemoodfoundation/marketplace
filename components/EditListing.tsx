@@ -57,7 +57,7 @@ export default function EditListing() {
         value: computed_title,
       })
 
-    const computed_description = !title ? grabValue(data, "description") : description;
+    const computed_description = !description ? grabValue(data, "description") : description;
     if (computed_description)
       elements.push({
         key: 'description',
