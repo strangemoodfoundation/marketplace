@@ -37,6 +37,36 @@ export default function CreateListing() {
 
   const [imageCIDs, setImageCIDs] = useState<any[]>([]);
 
+  function readBase64Async(file: Blob) {
+    return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
+      let reader = new FileReader();
+
+      reader.onload = () => {
+        const result = reader.result;
+        resolve(reader.result);
+      };
+
+      reader.onerror = reject;
+
+      reader.readAsDataURL(file);
+    })
+  }
+
+  async function web3Upload(file: Blob) {
+    const base64 = await readBase64Async(file);
+    const response = await fetch("/api/ipfs", {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/octet-stream'
+      },
+      body: base64
+    });
+    const json = await response.json();
+    return json["cid"];
+  };
+
   async function onSave() {
     if (!publicKey) return;
     if (!title || !description) return;
@@ -65,21 +95,8 @@ export default function CreateListing() {
     };
 
     const metadataBlob = new Blob([JSON.stringify(metadata)]);
-    const reader = new FileReader();
-    reader.readAsDataURL(metadataBlob);
-    reader.onload = function () {
-      fetch("/api/ipfs", {
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/octet-stream'
-        },
-        body: reader.result
-      })
-        .then(response => response.json())
-        .then(data => console.log(data["cid"]));
-    };
+    const cid = await web3Upload(metadataBlob);
+    console.log(cid);
 
     // const {
     //   tx,
@@ -147,30 +164,9 @@ export default function CreateListing() {
               const file = e.target.files[0];
               if (!file)
                 return
-              console.log(file);
-              const reader = new FileReader();
-              reader.readAsDataURL(file);
-              reader.onload = function () {
-                fetch("/api/ipfs", {
-                  method: 'POST',
-                  body: reader.result
-                })
-                  .then(response => response.json())
-                  .then(data => console.log(data["cid"]));
-              };
               try {
-              const response = await fetch("/api/ipfs", {
-                method: 'POST',
-                mode: 'cors',
-                credentials: 'same-origin',
-                headers: {
-                  'Content-Type': 'application/octet-stream'
-                },
-                body: file
-              });
-              const json = await response.json();
-              const cid = json["cid"];
-              console.log(cid);
+                const cid = await web3Upload(file);
+                console.log(cid);
               } catch (error) {
                 console.log('Error uploading file: ', error);
               }
