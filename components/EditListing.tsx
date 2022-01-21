@@ -4,19 +4,29 @@ import {
   fetchStrangemoodProgram,
   MAINNET,
   initListing,
+  Listing,
 } from '@strangemood/strangemood';
 import { create } from 'ipfs-http-client';
 import { useState } from 'react';
 import Login from '../components/Login';
-import { OpenMetaGraph } from '../lib/omg';
+import { OpenMetaGraph, grabValue } from '../lib/omg';
 import { useAnchorProvider } from '../lib/useAnchor';
+import { useListing, useListingMetadata } from '../lib/useListing';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
+import { PublicKey } from '@solana/web3.js';
+import { publicKey } from '@project-serum/anchor/dist/cjs/utils';
 
 function useIpfs() {
   const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
   return client;
+}
+
+function useOwnsListing(listing: Listing, pubkey: PublicKey | null) {
+  if (!pubkey || !listing)
+    return false
+  return listing.authority.toString() === pubkey.toString();
 }
 
 const LAMPORTS_PER_SOL = 1000000000;
@@ -24,12 +34,16 @@ const LAMPORTS_PER_SOL = 1000000000;
 export default function EditListing() {
   const ipfs = useIpfs();
   const { connection } = useConnection();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const { publicKey, sendTransaction, connected, connecting } = useWallet();
   const provider = useAnchorProvider();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const listing = useListing(provider, router.query.pubkey as string);
+  const { data } = useListingMetadata(listing);
+  const ownsListing = useOwnsListing(listing, publicKey);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [fileUrl, updateFileUrl] = useState(``);
 
   async function onSave() {
     if (!publicKey) return;
@@ -63,7 +77,11 @@ export default function EditListing() {
     fetch('https://ipfs.io/ipfs/' + cid);
   }
 
-  const [fileUrl, updateFileUrl] = useState(``);
+
+  if (!data || !listing) {
+    // loading
+    return <div></div>;
+  }
 
   if (!publicKey) {
     return <Login />;
@@ -76,32 +94,33 @@ export default function EditListing() {
         'animate-pulse opacity-50': isLoading,
       })}
     >
-      <div className="max-w-2xl bg-white p-4 border-gray-300 border-l border-r w-full m-auto flex flex-col h-full">
-        <h1 className="font-bold text-xl">New Listing</h1>
-        <p></p>
+      <div className="max-w-2xl bg-white p-4 border-gray-300 border-l border-r w-full m-auto flex flex-col gap-3 h-full">
+        {!ownsListing && <div className='border p-2 bg-red-300 w-full'><a className='font-bold'>Warning:</a> You are not the owner of this listing. Attempting to edit it will fail.</div>}
+        {ownsListing && <div className='border p-2 bg-green-300 w-full'>You are the owner of this listing.</div>}
+        <h1 className="font-bold text-xl">Edit Listing</h1>
 
-        <label className="flex flex-col mt-4">
+        <label className="flex flex-col">
           Title
           <input
             type={'text'}
-            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-            placeholder="Cool Title 123"
+            className="border border-gray-500 rounded-sm py-1 px-2"
             onChange={(e) => setTitle(e.target.value)}
+            placeholder={grabValue(data, 'title')}
             value={title}
           />
         </label>
 
-        <label className="flex flex-col mt-4 mb-2">
+        <label className="flex flex-col">
           Description
           <textarea
-            className="border border-gray-500 mt-2 rounded-sm py-1 px-2"
-            placeholder="Some Cool Description"
+            className="border border-gray-500 rounded-sm py-1 px-2"
             onChange={(e) => setDescription(e.target.value)}
+            placeholder={grabValue(data, 'description')}
             value={description}
           />
         </label>
 
-        <label className="flex flex-col mt-2 mb-2">
+        <label className="flex flex-col">
           Image
           <input
             type="file"
