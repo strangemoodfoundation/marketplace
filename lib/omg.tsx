@@ -20,6 +20,9 @@ export interface OpenMetaGraph {
   elements: OpenMetaGraphElement[];
 }
 
-export function grabValue(data: OpenMetaGraph, key: string): string {
-  return (data.elements.find((e) => e.key === key) as any).value;
+export function grabValue(data: OpenMetaGraph, key: string): string | undefined {
+  const element = data.elements.find((e) => e.key === key) as any;
+  if (element) {
+    return element.value;
+  }
 }
