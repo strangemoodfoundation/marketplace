@@ -178,7 +178,9 @@ export default function Checkout() {
         <h2 className="mb-1 text-xl font-bold capitalize">
           {grabValue(data, 'title')}
         </h2>
-        <p className="opacity-50 mb-4 ">{router.query.pubkey}</p>
+        <p className="mb-1 opacity-50">{router.query.pubkey}</p>
+        <img className='mb-1 w-full' src={grabValue(data, 'image').replace('ipfs://', '/api/ipfs?cid=')}></img>
+        <p className="mb-4 ">{grabValue(data, 'description')}</p>
 
         <button
           disabled={isLoading}

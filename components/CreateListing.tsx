@@ -5,7 +5,6 @@ import {
   MAINNET,
   initListing,
 } from '@strangemood/strangemood';
-import { create } from 'ipfs-http-client';
 import { useState } from 'react';
 import Login from '../components/Login';
 import { OpenMetaGraph } from '../lib/omg';
@@ -14,18 +13,13 @@ import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
 
-function useIpfs() {
-  const client = create('https://ipfs.rebasefoundation.org/api/v0' as any);
-  return client;
-}
-
 const LAMPORTS_PER_SOL = 1000000000;
 
 export default function CreateListing() {
-  const ipfs = useIpfs();
   const { connection } = useConnection();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [fileCID, updateFileCID] = useState(``);
   let solPrice = useSolPrice();
   const [price, setPrice] = useState<number>(
     solPrice === 0 ? 0.0001 : 0.02 / solPrice
@@ -35,7 +29,34 @@ export default function CreateListing() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [imageCIDs, setImageCIDs] = useState<any[]>([]);
+  function readBase64Async(file: Blob) {
+    return new Promise<string | ArrayBuffer | null>((resolve, reject) => {
+      let reader = new FileReader();
+
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+
+      reader.onerror = reject;
+
+      reader.readAsDataURL(file);
+    })
+  }
+
+  async function web3Upload(file: Blob) {
+    const base64 = await readBase64Async(file);
+    const response = await fetch("/api/ipfs", {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/octet-stream'
+      },
+      body: base64
+    });
+    const json = await response.json();
+    return json["cid"];
+  };
 
   async function onSave() {
     if (!publicKey) return;
@@ -61,14 +82,17 @@ export default function CreateListing() {
           type: 'plain/text',
           value: description,
         },
+        {
+          key: 'image',
+          type: 'image',
+          value: 'ipfs://' + fileCID,
+        },
       ],
     };
 
-    const { cid } = await ipfs.add(JSON.stringify(metadata));
-
-    // Trick the gateway into caching our metadata early
-    // which makes the next page load faster
-    fetch('https://ipfs.io/ipfs/' + cid);
+    const metadataBlob = new Blob([JSON.stringify(metadata)]);
+    const cid = await web3Upload(metadataBlob);
+    console.log(cid);
 
     const {
       tx,
@@ -84,16 +108,9 @@ export default function CreateListing() {
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
 
-    // Pin the listing data to ensure it's kept around for a bit
-    fetch('/api/pin/' + listingPubkey.toString(), {
-      method: 'POST',
-    });
-
     router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
   }
-
-  const [fileUrl, updateFileUrl] = useState(``);
 
   if (!publicKey) {
     return <Login />;
@@ -139,16 +156,20 @@ export default function CreateListing() {
             type="file"
             onChange={async (e: any) => {
               const file = e.target.files[0];
+              if (!file) {
+                updateFileCID(``);
+                return
+              }
               try {
-                const added = await ipfs.add(file);
-                const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-                updateFileUrl(url);
+                const cid = await web3Upload(file);
+                console.log(cid);
+                updateFileCID(cid);
               } catch (error) {
                 console.log('Error uploading file: ', error);
               }
             }}
           />
-          {fileUrl && <img src={fileUrl} width="600px" />}
+          {fileCID && <img className='mt-1' src={`/api/ipfs?cid=${fileCID}`} width="600px" />}
         </label>
 
         <label className="flex flex-col mt-2 mb-4">
