@@ -64,33 +64,35 @@ export default function CreateListing() {
       ],
     };
 
+    const metadataBlob = new Blob([JSON.stringify(metadata)], {type: "text/json"});
     const response = await fetch("/api/ipfs", {
       method: 'POST',
       mode: 'cors',
       credentials: 'same-origin',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/octet-stream'
       },
-      body: JSON.stringify(metadata)
+      body: metadataBlob
     });
     const json = await response.json();
     const cid = json["cid"];
+    console.log(cid);
 
-    const {
-      tx,
-      signers,
-      publicKey: listingPubkey,
-    } = await initListing(
-      strangemood as any,
-      connection,
-      publicKey,
-      new BN(price * LAMPORTS_PER_SOL),
-      'ipfs://' + cid
-    );
-    let sig = await sendTransaction(tx, connection, { signers });
-    await provider.connection.confirmTransaction(sig);
+    // const {
+    //   tx,
+    //   signers,
+    //   publicKey: listingPubkey,
+    // } = await initListing(
+    //   strangemood as any,
+    //   connection,
+    //   publicKey,
+    //   new BN(price * LAMPORTS_PER_SOL),
+    //   'ipfs://' + cid
+    // );
+    // let sig = await sendTransaction(tx, connection, { signers });
+    // await provider.connection.confirmTransaction(sig);
 
-    router.push(`/checkout/${listingPubkey.toString()}`);
+    // router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
   }
 
@@ -140,13 +142,24 @@ export default function CreateListing() {
             type="file"
             onChange={async (e: any) => {
               const file = e.target.files[0];
-              try {
-                const added = await ipfs.add(file);
-                const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-                updateFileUrl(url);
-              } catch (error) {
-                console.log('Error uploading file: ', error);
-              }
+              if (!file)
+                return
+              // try {
+                const response = await fetch("/api/ipfs", {
+                  method: 'POST',
+                  mode: 'cors',
+                  credentials: 'same-origin',
+                  headers: {
+                    'Content-Type': 'application/octet-stream'
+                  },
+                  body: file
+                });
+                const json = await response.json();
+                const cid = json["cid"];
+                console.log(cid); 
+              // } catch (error) {
+              //   console.log('Error uploading file: ', error);
+              // }
             }}
           />
           {fileUrl && <img src={fileUrl} width="600px" />}
