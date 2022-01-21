@@ -180,7 +180,7 @@ export default function Checkout() {
           {grabValue(data, 'title')}
         </h2>
         <p className="mb-1 opacity-50">{router.query.pubkey}</p>
-        {imageUri && <img className='mb-1 w-full' src={imageUri.replace('ipfs://', '/api/ipfs?cid=')}></img>}
+        {imageUri && <img className='mb-1 w-full' src={imageUri.replace('ipfs://', '/api/ipfs/')}></img>}
         <p className="mb-4 ">{grabValue(data, 'description')}</p>
 
         <button

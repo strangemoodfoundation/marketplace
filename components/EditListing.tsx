@@ -162,7 +162,7 @@ export default function EditListing() {
               }
             }}
           />
-          {fileCID && <img className='mt-1' src={`/api/ipfs?cid=${fileCID}`} width="600px" />}
+          {fileCID && <img className='mt-1' src={`/api/ipfs/${fileCID}`} width="600px" />}
         </label>
 
         <button
