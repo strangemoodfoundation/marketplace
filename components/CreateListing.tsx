@@ -98,21 +98,21 @@ export default function CreateListing() {
     const cid = await web3Upload(metadataBlob);
     console.log(cid);
 
-    // const {
-    //   tx,
-    //   signers,
-    //   publicKey: listingPubkey,
-    // } = await initListing(
-    //   strangemood as any,
-    //   connection,
-    //   publicKey,
-    //   new BN(price * LAMPORTS_PER_SOL),
-    //   'ipfs://' + cid
-    // );
-    // let sig = await sendTransaction(tx, connection, { signers });
-    // await provider.connection.confirmTransaction(sig);
+    const {
+      tx,
+      signers,
+      publicKey: listingPubkey,
+    } = await initListing(
+      strangemood as any,
+      connection,
+      publicKey,
+      new BN(price * LAMPORTS_PER_SOL),
+      'ipfs://' + cid
+    );
+    let sig = await sendTransaction(tx, connection, { signers });
+    await provider.connection.confirmTransaction(sig);
 
-    // router.push(`/checkout/${listingPubkey.toString()}`);
+    router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
   }
 

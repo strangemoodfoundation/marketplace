@@ -1,6 +1,5 @@
 import { Blob } from 'node:buffer';
 import { NextApiRequest, NextApiResponse } from 'next';
-import initMiddleware from '../../lib/initMiddleware';
 import { Web3Storage, File } from 'web3.storage';
 
 /**
