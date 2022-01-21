@@ -28,7 +28,6 @@ export default async function handler(
                 if (!web3_res || !web3_res.ok)
                     return res.status(500).send(`failed to get cid: ${query_cid} - [${web3_res?.status}] ${web3_res?.statusText}`);
                 const web3_files = await web3_res.files();
-                console.log(web3_files[0]);
                 const buffer = await web3_files[0].arrayBuffer()// We should only ever retreive a single file
                 return res.end(Buffer.from(buffer));
             case 'POST':
@@ -36,7 +35,6 @@ export default async function handler(
                     return res.status(400).end("Missing request body");
                 const buff = Buffer.from(req.body.split(',')[1], 'base64')
                 const web3_file = new File([buff], "data");
-                console.log(web3_file);
                 const cid = await web3Client.put([web3_file], { wrapWithDirectory: false })
                 return res.status(200).json({cid: cid});
             default:
