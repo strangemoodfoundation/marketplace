@@ -48,26 +48,35 @@ export default function EditListing() {
       MAINNET.STRANGEMOOD_PROGRAM_ID
     );
 
+    const elements = [];
+    const computed_title = !title ? grabValue(data, "title") : title;
+    if (computed_title)
+      elements.push({
+        key: 'title',
+        type: 'plain/text',
+        value: computed_title,
+      })
+
+    const computed_description = !title ? grabValue(data, "description") : description;
+    if (computed_description)
+      elements.push({
+        key: 'description',
+        type: 'plain/text',
+        value: computed_description,
+      })
+
+    const computed_image = !fileCID ? grabValue(data, "image") : 'ipfs://' + fileCID;
+    if (computed_image)
+      elements.push({
+        key: 'image',
+        type: 'image',
+        value: computed_image,
+      })
+
     const metadata: OpenMetaGraph = {
       version: '0.1.0',
       formats: [],
-      elements: [
-        {
-          key: 'title',
-          type: 'plain/text',
-          value: !title ? grabValue(data, "title") : title,
-        },
-        {
-          key: 'description',
-          type: 'plain/text',
-          value: !description ? grabValue(data, "description") : description,
-        },
-        {
-          key: 'image',
-          type: 'image',
-          value: !fileCID ? grabValue(data, "image") : 'ipfs://' + fileCID,
-        },
-      ],
+      elements: elements
     };
 
     const metadataBlob = new Blob([JSON.stringify(metadata)]);
