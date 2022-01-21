@@ -4,7 +4,6 @@ import {
   fetchStrangemoodProgram,
   Listing,
   MAINNET,
-  Strangemood,
   TESTNET,
 } from '@strangemood/strangemood';
 import { NextApiRequest, NextApiResponse } from 'next';
