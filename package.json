@@ -15,7 +15,7 @@
     "@solana/wallet-adapter-react-ui": "^0.6.1",
     "@solana/wallet-adapter-wallets": "^0.11.3",
     "@solana/web3.js": "^1.31.0",
-    "@strangemood/strangemood": "0.0.0-40",
+    "@strangemood/strangemood": "0.0.0-41",
     "base58-encode": "^0.2.0",
     "classnames": "^2.3.1",
     "cors": "^2.8.5",

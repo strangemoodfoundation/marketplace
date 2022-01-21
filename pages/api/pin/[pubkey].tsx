@@ -76,8 +76,8 @@ export default async function handler(
 
     const programId =
       cluster === 'mainnet-beta'
-        ? MAINNET.STRANGEMOOD_PROGRAM_ID
-        : TESTNET.STRANGEMOOD_PROGRAM_ID;
+        ? MAINNET.strangemood_program_id
+        : TESTNET.strangemood_program_id;
     const strangemood = await fetchStrangemoodProgram(provider, programId);
 
     console.log('Fetching for', {

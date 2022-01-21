@@ -682,10 +682,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@strangemood/strangemood@0.0.0-40":
-  version "0.0.0-40"
-  resolved "https://registry.yarnpkg.com/@strangemood/strangemood/-/strangemood-0.0.0-40.tgz#5f0d9939436f61b74055c834f75a8a67d95a5325"
-  integrity sha512-E/BqWdKcSzO1isHRnyoqWM505PzmDkXYJzWrnwOMc2I7CMMzVOvmh43WHUbXoSdqbfAI1fM0jnENTv8mhJXkUw==
+"@strangemood/strangemood@0.0.0-41":
+  version "0.0.0-41"
+  resolved "https://registry.yarnpkg.com/@strangemood/strangemood/-/strangemood-0.0.0-41.tgz#b4d5bab9bcb4822b4deb9d871ea0f731f514b728"
+  integrity sha512-JE/B4KF2aK1XatLWQIWcaYjJFzkwgkSfWIbumbUVlrLARiAct4F4xP/zLRTY15MTr+Pr6aCJEXGZtglVdyyPcg==
   dependencies:
     "@project-serum/anchor" "^0.20.1"
     "@solana/buffer-layout" "^4.0.0"
