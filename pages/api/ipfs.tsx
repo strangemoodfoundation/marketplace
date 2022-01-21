@@ -30,17 +30,19 @@ export default async function handler(
                     return res.status(500).send(`failed to get cid: ${query_cid} - [${web3_res?.status}] ${web3_res?.statusText}`);
                 const web3_files = await web3_res.files();
                 console.log(web3_files[0]);
-                const buff = await web3_files[0].arrayBuffer(); // We should only ever retreive a single file
-                console.log(buff);
-                return res.end(Buffer.from(buff));
+                const base64 = await web3_files[0].text(); // We should only ever retreive a single file
+                return res.end(Buffer.from(base64.split(',')[1], 'base64'));
             case 'POST':
                 if (!req.body)
                     return res.status(400).end("Missing request body");
-                const web3_file = new File([req.body], "image.png")
-                const cid = await web3Client.put([web3_file])
+                const buff = Buffer.from(req.body);
+                console.log(buff);
+                const web3_file = new File([buff], "data");
+                console.log(web3_file);
+                const cid = await web3Client.put([web3_file], { wrapWithDirectory: false })
                 return res.status(200).json({cid: cid});
             default:
-                res.setHeader('Allow', ['GET', 'PUT'])
+                res.setHeader('Allow', ['GET', 'POST'])
                 return res.status(405).end(`Method ${req.method} Not Allowed`)
         }
     } catch (err) {

@@ -64,19 +64,22 @@ export default function CreateListing() {
       ],
     };
 
-    const metadataBlob = new Blob([JSON.stringify(metadata)], {type: "text/json"});
-    const response = await fetch("/api/ipfs", {
-      method: 'POST',
-      mode: 'cors',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/octet-stream'
-      },
-      body: metadataBlob
-    });
-    const json = await response.json();
-    const cid = json["cid"];
-    console.log(cid);
+    const metadataBlob = new Blob([JSON.stringify(metadata)]);
+    const reader = new FileReader();
+    reader.readAsDataURL(metadataBlob);
+    reader.onload = function () {
+      fetch("/api/ipfs", {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/octet-stream'
+        },
+        body: reader.result
+      })
+        .then(response => response.json())
+        .then(data => console.log(data["cid"]));
+    };
 
     // const {
     //   tx,
@@ -144,22 +147,33 @@ export default function CreateListing() {
               const file = e.target.files[0];
               if (!file)
                 return
-              // try {
-                const response = await fetch("/api/ipfs", {
+              console.log(file);
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              reader.onload = function () {
+                fetch("/api/ipfs", {
                   method: 'POST',
-                  mode: 'cors',
-                  credentials: 'same-origin',
-                  headers: {
-                    'Content-Type': 'application/octet-stream'
-                  },
-                  body: file
-                });
-                const json = await response.json();
-                const cid = json["cid"];
-                console.log(cid); 
-              // } catch (error) {
-              //   console.log('Error uploading file: ', error);
-              // }
+                  body: reader.result
+                })
+                  .then(response => response.json())
+                  .then(data => console.log(data["cid"]));
+              };
+              try {
+              const response = await fetch("/api/ipfs", {
+                method: 'POST',
+                mode: 'cors',
+                credentials: 'same-origin',
+                headers: {
+                  'Content-Type': 'application/octet-stream'
+                },
+                body: file
+              });
+              const json = await response.json();
+              const cid = json["cid"];
+              console.log(cid);
+              } catch (error) {
+                console.log('Error uploading file: ', error);
+              }
             }}
           />
           {fileUrl && <img src={fileUrl} width="600px" />}
