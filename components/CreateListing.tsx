@@ -1,4 +1,3 @@
-import { BN } from '@project-serum/anchor';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   fetchStrangemoodProgram,
@@ -74,13 +73,13 @@ export default function CreateListing() {
       tx,
       signers,
       publicKey: listingPubkey,
-    } = await initListing(
-      strangemood as any,
-      connection,
-      publicKey,
-      new BN(price * LAMPORTS_PER_SOL),
-      'ipfs://' + cid
-    );
+    } = await initListing({
+      //   program,
+      // connection,
+      // publicKey,
+      // new BN(price * LAMPORTS_PER_SOL),
+      // 'ipfs://' + cid
+    } as any);
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
 

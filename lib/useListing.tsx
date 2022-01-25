@@ -4,25 +4,24 @@ import {
   fetchStrangemoodProgram,
   Listing,
   MAINNET,
-  Strangemood,
 } from '@strangemood/strangemood';
 import { useEffect, useState } from 'react';
 import { OpenMetaGraph } from './omg';
 import { useAnchorProvider } from './useAnchor';
 import { useSWR } from './useSWR';
 
-function useStrangemoodProgram() {
-  const provider = useAnchorProvider();
-  const [program, setProgram] = useState<Program<Strangemood>>();
+// function useStrangemoodProgram() {
+//   const provider = useAnchorProvider();
+//   const [program, setProgram] = useState<Program<Strangemood>>();
 
-  useEffect(() => {
-    fetchStrangemoodProgram(provider).then((program) =>
-      setProgram(program as any)
-    );
-  }, []);
+//   useEffect(() => {
+//     fetchStrangemoodProgram(provider).then((program) =>
+//       setProgram(program as any)
+//     );
+//   }, []);
 
-  return program;
-}
+//   return program;
+// }
 
 export function useListingMetadata(listing: any) {
   return useSWR<OpenMetaGraph>(

@@ -29,13 +29,13 @@ const Home: NextPage = () => {
           </Link>
         </div>
         <br />
-        {/* {listings.map((l) => (
+        {listings.map((l) => (
           <GameView
             key={l.publicKey.toString()}
             publicKey={l.publicKey.toString()}
             listingAccount={l.account}
           />
-        ))} */}
+        ))}
       </div>
     </div>
   );
