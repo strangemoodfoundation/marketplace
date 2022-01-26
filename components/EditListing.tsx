@@ -16,7 +16,7 @@ import { useListing, useListingMetadata } from '../lib/useListing';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { PublicKey } from '@solana/web3.js';
-import web3Upload from '../lib/web3Util';
+import { Web3Storage } from 'web3.storage';
 
 function useOwnsListing(listing: Listing, pubkey: PublicKey | null) {
   if (!pubkey || !listing)
@@ -80,7 +80,9 @@ export default function EditListing() {
     };
 
     const metadataBlob = new Blob([JSON.stringify(metadata)]);
-    const cid = await web3Upload(metadataBlob);
+    const web3_file = new File([metadataBlob], "data");
+    const web3Client = new Web3Storage({ token: "proxy_replaces", endpoint: new URL(window.location.protocol + '//' + window.location.host + '/api/web3/') });
+    const cid =  await web3Client.put([web3_file], { wrapWithDirectory: false })
     console.log(cid);
 
     const listingPubkey = new PublicKey(router.query.pubkey as string)
@@ -154,7 +156,8 @@ export default function EditListing() {
                 return
               }
               try {
-                const cid = await web3Upload(file);
+                const web3Client = new Web3Storage({ token: "proxy_replaces", endpoint: new URL(window.location.protocol + '//' + window.location.host + '/api/web3/') });
+                const cid = await web3Client.put([file], { wrapWithDirectory: false })
                 console.log(cid);
                 updateFileCID(cid);
               } catch (error) {
