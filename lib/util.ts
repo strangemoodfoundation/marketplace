@@ -68,7 +68,7 @@ export const createWrappedNativeAccount = async (
       newAccountPubkey: newAccount.publicKey,
       lamports: balanceNeeded,
       space: AccountLayout.span,
-      programId: strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      programId: strangemood.MAINNET.strangemood_program_id,
     })
   ); // Send lamports to it (these will be wrapped into native tokens by the token program)
 
@@ -84,7 +84,7 @@ export const createWrappedNativeAccount = async (
 
   transaction.add(
     Token.createInitAccountInstruction(
-      strangemood.MAINNET.STRANGEMOOD_PROGRAM_ID,
+      strangemood.MAINNET.strangemood_program_id,
       NATIVE_MINT,
       newAccount.publicKey,
       publicKey
