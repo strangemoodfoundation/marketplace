@@ -46,13 +46,13 @@ export default function CreateListing() {
       MAINNET.strangemood_program_id
     );
 
-    const metadata: OpenMetaGraph = {
+    const metadata = {
       version: '0.1.0',
-      formats: [],
+      schemas: ['ipfs://QmUmLdYHHAqDYNnRGeKbHg4pxocFV1VAZuuHuRvdNiY1Bb'],
       elements: [
         {
-          key: 'title',
-          type: 'plain/text',
+          key: 'name',
+          object: 'string',
           value: title,
         },
         {
@@ -80,6 +80,7 @@ export default function CreateListing() {
       // new BN(price * LAMPORTS_PER_SOL),
       // 'ipfs://' + cid
     } as any);
+
     let sig = await sendTransaction(tx, connection, { signers });
     await provider.connection.confirmTransaction(sig);
 

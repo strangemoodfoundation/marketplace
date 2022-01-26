@@ -72,7 +72,7 @@ export default async function handler(
   });
 
   const signature = await program.provider.send(tx);
-  return {
+  return res.json({
     signature,
-  };
+  });
 }
