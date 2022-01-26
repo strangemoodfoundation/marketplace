@@ -21,11 +21,13 @@
     "cors": "^2.8.5",
     "ipfs-http-client": "^55.0.0",
     "next": "12.0.7",
+    "next-http-proxy-middleware": "^1.2.1",
     "node-fetch": "^3.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-dropzone": "^11.4.2",
-    "swr": "^1.1.2"
+    "swr": "^1.1.2",
+    "web3.storage": "^3.5.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

@@ -26,6 +26,7 @@ export default function GameView(props: {
   }
 
   const priceInSol = listing.price.toNumber() / 1000000000;
+  const description = grabValue(data, 'description');
 
   return (
     <div className="mx-auto max-w-2xl border-gray-200 border mb-4 p-4">
@@ -40,7 +41,7 @@ export default function GameView(props: {
           {props.publicKey}
         </a>
       </Link>
-      <p className="">{grabValue(data, 'description').trim()}</p>
+      {description && <p className="">{description.trim()}</p>}
       <Link href={`/checkout/${props.publicKey}`}>
         <button className="bg-green-300 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center px-3 py-2">
           <div>

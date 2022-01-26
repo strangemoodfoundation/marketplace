@@ -121,6 +121,7 @@ export default function Checkout() {
   }
 
   const priceInSol = listing.price.toNumber() / 1000000000;
+  const imageUri = grabValue(data, 'image');
 
   return (
     <div className="bg-blue-50 h-full px-4 w-full items-center justify-center flex flex-col sm:flex-row max-w-4xl sm:mx-auto my-auto gap-4 sm:gap-0">
@@ -178,7 +179,9 @@ export default function Checkout() {
         <h2 className="mb-1 text-xl font-bold capitalize">
           {grabValue(data, 'title')}
         </h2>
-        <p className="opacity-50 mb-4 ">{router.query.pubkey}</p>
+        <p className="mb-1 opacity-50">{router.query.pubkey}</p>
+        {imageUri && <img className='mb-1 w-full' src={imageUri.replace('ipfs://', '/api/ipfs/')}></img>}
+        <p className="mb-4 ">{grabValue(data, 'description')}</p>
 
         <button
           disabled={isLoading}
