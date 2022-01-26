@@ -12,7 +12,7 @@ import { useAnchorProvider } from '../lib/useAnchor';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
-import web3Upload from '../lib/web3Util';
+import { Web3Storage, File, Filelike } from 'web3.storage';
 
 const LAMPORTS_PER_SOL = 1000000000;
 
@@ -29,6 +29,11 @@ export default function CreateListing() {
   const provider = useAnchorProvider();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  async function saveToWeb3Storage(web3_file: Filelike) {
+    const web3Client = new Web3Storage({ token: "proxy_replaces", endpoint: new URL(window.location.protocol + '//' + window.location.host + '/api/web3/') });
+    return await web3Client.put([web3_file], { wrapWithDirectory: false })
+  }
 
   async function onSave() {
     if (!publicKey) return;
@@ -63,7 +68,8 @@ export default function CreateListing() {
     };
 
     const metadataBlob = new Blob([JSON.stringify(metadata)]);
-    const cid = await web3Upload(metadataBlob);
+    const web3_file = new File([metadataBlob], "data");
+    const cid = await saveToWeb3Storage(web3_file);
     console.log(cid);
 
     const {
@@ -133,7 +139,7 @@ export default function CreateListing() {
                 return
               }
               try {
-                const cid = await web3Upload(file);
+                const cid = await saveToWeb3Storage(file);
                 console.log(cid);
                 updateFileCID(cid);
               } catch (error) {
