@@ -19,11 +19,8 @@ const Home: NextPage = () => {
         <div className="flex flex-row justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">Strangemood</h1>
-            <p className="opacity-50">
+            <p className="opacity-50 ">
               This is a stream of listings on the Strangemood protocol.{' '}
-              <a href="https://github.com/strangemoodfoundation/marketplace">
-                See the code for this demo on github.
-              </a>
             </p>
           </div>
 

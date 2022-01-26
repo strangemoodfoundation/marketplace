@@ -6,12 +6,13 @@ import {
 } from '@strangemood/strangemood';
 import { useState } from 'react';
 import Login from '../components/Login';
-import { OpenMetaGraph } from '../lib/omg';
 import { useAnchorProvider } from '../lib/useAnchor';
 import cn from 'classnames';
 import { useRouter } from 'next/router';
 import { useSolPrice } from '../lib/useSolPrice';
 import { Web3Storage, File, Filelike } from 'web3.storage';
+import * as anchor from '@project-serum/anchor';
+import { OpenMetaGraph } from 'openmetagraph';
 
 const LAMPORTS_PER_SOL = 1000000000;
 
@@ -30,8 +31,13 @@ export default function CreateListing() {
   const [isLoading, setIsLoading] = useState(false);
 
   async function saveToWeb3Storage(web3_file: Filelike) {
-    const web3Client = new Web3Storage({ token: "proxy_replaces", endpoint: new URL(window.location.protocol + '//' + window.location.host + '/api/web3/') });
-    return await web3Client.put([web3_file], { wrapWithDirectory: false })
+    const web3Client = new Web3Storage({
+      token: 'proxy_replaces',
+      endpoint: new URL(
+        window.location.protocol + '//' + window.location.host + '/api/web3/'
+      ),
+    });
+    return await web3Client.put([web3_file], { wrapWithDirectory: false });
   }
 
   async function onSave() {
@@ -39,12 +45,13 @@ export default function CreateListing() {
     if (!title || !description) return;
 
     setIsLoading(true);
-    const strangemood = await fetchStrangemoodProgram(
+    const program = await fetchStrangemoodProgram(
       provider,
       MAINNET.strangemood_program_id
     );
 
-    const metadata = {
+    const metadata: OpenMetaGraph = {
+      object: 'omg',
       version: '0.1.0',
       schemas: ['ipfs://QmUmLdYHHAqDYNnRGeKbHg4pxocFV1VAZuuHuRvdNiY1Bb'],
       elements: [
@@ -55,19 +62,20 @@ export default function CreateListing() {
         },
         {
           key: 'description',
-          type: 'plain/text',
+          object: 'string',
           value: description,
         },
         {
           key: 'image',
-          type: 'image',
-          value: 'ipfs://' + fileCID,
+          object: 'file',
+          uri: 'ipfs://' + fileCID,
+          contentType: 'image/png',
         },
       ],
     };
 
     const metadataBlob = new Blob([JSON.stringify(metadata)]);
-    const web3_file = new File([metadataBlob], "data");
+    const web3_file = new File([metadataBlob], 'data');
     const cid = await saveToWeb3Storage(web3_file);
     console.log(cid);
 
@@ -76,15 +84,18 @@ export default function CreateListing() {
       signers,
       publicKey: listingPubkey,
     } = await initListing({
-      //   program,
-      // connection,
-      // publicKey,
-      // new BN(price * LAMPORTS_PER_SOL),
-      // 'ipfs://' + cid
-    } as any);
+      program,
+      signer: provider.wallet.publicKey,
+      price: new anchor.BN(price * LAMPORTS_PER_SOL),
+      decimals: 0,
+      uri: 'ipfs://' + cid,
+      isConsumable: false,
+      isRefundable: false,
+      isAvailable: true,
+    });
 
     let sig = await sendTransaction(tx, connection, { signers });
-    await provider.connection.confirmTransaction(sig);
+    await provider.connection.confirmTransaction(sig, 'confirmed');
 
     router.push(`/checkout/${listingPubkey.toString()}`);
     setIsLoading(false);
@@ -136,7 +147,7 @@ export default function CreateListing() {
               const file = e.target.files[0];
               if (!file) {
                 updateFileCID(``);
-                return
+                return;
               }
               try {
                 const cid = await saveToWeb3Storage(file);
@@ -147,7 +158,9 @@ export default function CreateListing() {
               }
             }}
           />
-          {fileCID && <img className='mt-1' src={`/api/ipfs/${fileCID}`} width="600px" />}
+          {fileCID && (
+            <img className="mt-1" src={`/api/ipfs/${fileCID}`} width="600px" />
+          )}
         </label>
 
         <label className="flex flex-col mt-2 mb-4">

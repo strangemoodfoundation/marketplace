@@ -3,18 +3,19 @@ import { PublicKey } from '@solana/web3.js';
 import {
   fetchStrangemoodProgram,
   Listing,
-  purchaseListing,
+  purchase,
 } from '@strangemood/strangemood';
-import classNames from 'classnames';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import Login from '../../components/Login';
 import { grabValue } from '../../lib/omg';
 import { useAnchorProvider } from '../../lib/useAnchor';
 import { useListing, useListingMetadata } from '../../lib/useListing';
 import { useSolPrice } from '../../lib/useSolPrice';
 import * as splToken from '@solana/spl-token';
+import { BN } from '@project-serum/anchor';
+import Login from '../../components/Login';
+import classNames from 'classnames';
 
 function ALink(props: { href: string; children: any }) {
   return (
@@ -54,12 +55,7 @@ function useTokenBalance(mint: PublicKey) {
       if (!publicKey || !provider || !mint) return;
 
       let associatedTokenAccountAddress =
-        await splToken.Token.getAssociatedTokenAddress(
-          splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-          splToken.TOKEN_PROGRAM_ID,
-          mint,
-          publicKey
-        );
+        await splToken.getAssociatedTokenAddress(mint, publicKey);
 
       try {
         const account = await provider.connection.getTokenAccountBalance(
@@ -88,26 +84,39 @@ export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
   const listingTokenBalance = useTokenBalance(listing?.mint);
 
-  async function purchase() {
+  async function onPurchase() {
     if (!publicKey) return;
 
     setIsLoading(true);
     const program = await fetchStrangemoodProgram(provider);
 
-    const { tx, signers } = await purchaseListing(
+    const cashRequest = await fetch('/cash');
+    const { publicKey: cashier } = await cashRequest.json();
+    console.log('cashier');
+
+    const { tx, receipt } = await purchase({
       program,
-      provider.connection,
-      new PublicKey(publicKey),
-      {
+      signer: new PublicKey(publicKey),
+      cashier: new PublicKey(cashier),
+      listing: {
         account: listing,
         publicKey: new PublicKey(router.query.pubkey as string),
-      }
-    );
-
-    const sig = await sendTransaction(tx, provider.connection, {
-      signers,
+      },
+      quantity: new BN(1),
     });
+
+    const sig = await sendTransaction(tx, provider.connection);
     await provider.connection.confirmTransaction(sig);
+    console.log('receipt', receipt.toString());
+
+    fetch('/cash/' + receipt.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
     setIsLoading(false);
   }
 
@@ -180,12 +189,17 @@ export default function Checkout() {
           {grabValue(data, 'title')}
         </h2>
         <p className="mb-1 opacity-50">{router.query.pubkey}</p>
-        {imageUri && <img className='mb-1 w-full' src={imageUri.replace('ipfs://', '/api/ipfs/')}></img>}
+        {imageUri && (
+          <img
+            className="mb-1 w-full"
+            src={imageUri.replace('ipfs://', '/api/ipfs/')}
+          ></img>
+        )}
         <p className="mb-4 ">{grabValue(data, 'description')}</p>
 
         <button
           disabled={isLoading}
-          onClick={() => purchase().catch(console.error)}
+          onClick={() => onPurchase().catch(console.error)}
           className="bg-green-300 px-3 py-2 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center disabled:cursor-wait"
         >
           <div>

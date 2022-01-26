@@ -59,7 +59,6 @@ export default async function handler(
 
   const { tx } = await cash({
     program,
-    conn,
     signer: provider.wallet.publicKey,
     receipt: {
       publicKey: receiptPubkey,
