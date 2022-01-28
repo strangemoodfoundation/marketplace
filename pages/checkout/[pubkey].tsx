@@ -90,9 +90,11 @@ export default function Checkout() {
     setIsLoading(true);
     const program = await fetchStrangemoodProgram(provider);
 
-    const cashRequest = await fetch('/cash');
+    const cashRequest = await fetch('/api/cash');
+    if (cashRequest.status !== 200) {
+      throw new Error(await cashRequest.text());
+    }
     const { publicKey: cashier } = await cashRequest.json();
-    console.log('cashier');
 
     const { tx, receipt } = await purchase({
       program,
@@ -106,16 +108,20 @@ export default function Checkout() {
     });
 
     const sig = await sendTransaction(tx, provider.connection);
-    await provider.connection.confirmTransaction(sig);
+    await provider.connection.confirmTransaction(sig, 'finalized');
     console.log('receipt', receipt.toString());
 
-    fetch('/cash/' + receipt.toString(), {
+    const result = await fetch('/api/cash/' + receipt.toString(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({}),
     });
+
+    if (result.status !== 200) {
+      throw new Error(`Failed to cash receipt: '${receipt.toString()}'`);
+    }
 
     setIsLoading(false);
   }
@@ -199,7 +205,11 @@ export default function Checkout() {
 
         <button
           disabled={isLoading}
-          onClick={() => onPurchase().catch(console.error)}
+          onClick={() =>
+            onPurchase().catch((err) => {
+              throw err;
+            })
+          }
           className="bg-green-300 px-3 py-2 mt-4 border border-green-700 rounded-sm text-left w-full flex justify-between items-center disabled:cursor-wait"
         >
           <div>

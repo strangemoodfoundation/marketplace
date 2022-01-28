@@ -1,5 +1,4 @@
 import type { NextPage } from 'next';
-
 import { useListings } from '../lib/useListing';
 import GameView from '../components/GameView';
 import { useAnchorProvider } from '../lib/useAnchor';

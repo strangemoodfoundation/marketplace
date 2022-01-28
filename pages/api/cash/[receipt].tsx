@@ -1,35 +1,13 @@
 import { Provider, web3 } from '@project-serum/anchor';
+import { clusterApiUrl, PublicKey } from '@solana/web3.js';
 import {
-  Transaction,
-  Keypair,
-  clusterApiUrl,
-  PublicKey,
-} from '@solana/web3.js';
-import { cash, fetchStrangemoodProgram } from '@strangemood/strangemood';
-import { MAINNET, TESTNET } from '@strangemood/strangemood/dist/src/constants';
+  cash,
+  fetchStrangemoodProgram,
+  MAINNET,
+  TESTNET,
+} from '@strangemood/strangemood';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-function cashierWallet() {
-  let private_key = process.env.PRIVATE_KEY;
-  if (!private_key) {
-    throw new Error('Unexpectedly did not find process.env.SOLANA_KEYPAIR');
-  }
-  const keypair = Keypair.fromSecretKey(
-    Uint8Array.from(JSON.parse(private_key))
-  );
-
-  return {
-    signTransaction: async (tx: Transaction): Promise<Transaction> => {
-      tx.sign(keypair);
-      return tx;
-    },
-    signAllTransactions: async (txs: Transaction[]): Promise<Transaction[]> => {
-      txs.forEach((tx) => tx.sign(keypair));
-      return txs;
-    },
-    publicKey: keypair.publicKey,
-  };
-}
+import { cashierWallet } from '../../../lib/cashierWallet';
 
 /**
  * Cashes a reciept
@@ -55,7 +33,6 @@ export default async function handler(
 
   let receiptPubkey = new PublicKey(pubkey);
   const receipt = await program.account.receipt.fetch(receiptPubkey);
-  const listing = await program.account.listing.fetch(receipt.listing);
 
   const { tx } = await cash({
     program,
@@ -63,10 +40,6 @@ export default async function handler(
     receipt: {
       publicKey: receiptPubkey,
       account: receipt as any,
-    },
-    listing: {
-      publicKey: receipt.listing,
-      account: listing,
     },
   });
 
