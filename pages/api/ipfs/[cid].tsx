@@ -8,7 +8,6 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    // TODO: Update for storing/retreiving non-json
     try {
         if (!process.env.WEB_3_STORAGE_TOKEN)
             return res.status(500).end("Missing web3.storage token");
